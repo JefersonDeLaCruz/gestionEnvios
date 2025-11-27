@@ -1,3 +1,17 @@
 @import 'tailwindcss';
 
-@plugin "daisyui";
+@plugin 'daisyui' {
+    themes: synthwave, light --default, dark --prefersdark, corporate;
+}
+
+@plugin 'daisyui/theme' {
+    name: "synthwave";
+    --color-primary: hsl(299, 100%, 47%);
+
+    --color-error: hsl(97, 96%, 58%);
+
+    /* --color-neutral: hsl(44, 66%, 52%);
+    ----color-base-100: hsl(44, 66%, 52%); */
+
+
+}
