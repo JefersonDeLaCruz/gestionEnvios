@@ -27,62 +27,97 @@
     .delay-200 { animation-delay: 0.2s; }
 </style>
 
-<div class="bg-black min-h-screen flex flex-col justify-center items-center lg:flex-row text-white p-4 lg:p-0 overflow-hidden">
-    
-    <div class="w-full lg:w-1/2 flex justify-center items-center h-full mb-10 lg:mb-0">
-        <svg viewBox="0 0 24 24" aria-hidden="true" class="h-16 w-16 lg:h-[350px] lg:w-[350px] fill-current text-white cursor-default">
-            <g>
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-            </g>
-        </svg>
+<!-- Login Modal -->
+<div x-data="{ loginOpen: false, registerOpen: false }" @open-register-modal.window="loginOpen = false; registerOpen = true" @open-login-modal.window="registerOpen = false; loginOpen = true">
+    <div x-show="loginOpen" x-cloak style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="loginOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-[rgba(91,112,131,0.4)] transition-opacity" aria-hidden="true" @click="loginOpen = false"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div x-show="loginOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-black rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[600px] sm:w-full min-h-[600px] relative">
+                <button @click="loginOpen = false" class="absolute top-4 left-4 p-2 rounded-full hover:bg-gray-900 transition z-10">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                
+                @livewire('login-form')
+            </div>
+        </div>
     </div>
 
-    <div class="w-full lg:w-1/2 flex flex-col justify-center px-4 lg:pl-10 max-w-2xl">
-        
-        <div class="opacity-0 animate-enter">
-            <h1 class="text-5xl lg:text-7xl font-extrabold mb-12 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-400 to-[#1d9bf0] animate-gradient-x pb-2">
-                Gestiona, envía <br>y monitorea
-            </h1>
-        </div>
+    <!-- Register Modal -->
+    <div x-show="registerOpen" x-cloak style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="registerOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-[rgba(91,112,131,0.4)] transition-opacity" aria-hidden="true" @click="registerOpen = false"></div>
 
-        <div class="opacity-0 animate-enter delay-100">
-            <h2 class="text-3xl font-bold mb-8">Comienza a gestionar</h2>
-        </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <div class="w-full max-w-[300px] flex flex-col gap-3 opacity-0 animate-enter delay-200">
-            
-            <button class="btn bg-white text-black hover:bg-gray-200 border-none rounded-full capitalize text-base font-normal flex items-center gap-2 transition-transform active:scale-95">
-                <svg viewBox="0 0 24 24" class="h-5 w-5">
-                    <g>
-                        <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
-                    </g>
-                </svg>
-                Registrarse con Google
-            </button>
-
-            <div class="flex items-center w-full my-1">
-                <div class="h-px bg-gray-700 flex-1"></div>
-                <span class="px-3 text-sm text-gray-200">o</span>
-                <div class="h-px bg-gray-700 flex-1"></div>
-            </div>
-
-            <button class="btn bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white border-none rounded-full capitalize text-base font-bold transition-transform hover:shadow-[0_0_15px_rgba(29,155,240,0.5)] active:scale-95">
-                Crear cuenta
-            </button>
-
-            <div class="flex items-center w-full mt-5">
-                <div class="h-px bg-gray-700 flex-1"></div>
-                <div class="h-px bg-gray-700 flex-1"></div>
-            </div>
-
-            <div class="mt-1">
-                <h3 class="text-xl text-center font-bold mb-4">¿Ya tienes una cuenta?</h3>
-                
-                <button class="btn btn-outline text-[#1d9bf0] border-gray-600 hover:bg-[#1d9bf0]/10 hover:border-[#1d9bf0] hover:text-[#1d9bf0] rounded-full w-full capitalize text-base font-bold mb-4 transition-all">
-                    Iniciar sesión
+            <div x-show="registerOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-black rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[600px] sm:w-full min-h-[600px] relative">
+                <button @click="registerOpen = false" class="absolute top-4 left-4 p-2 rounded-full hover:bg-gray-900 transition z-10">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
+                
+                @livewire('register-form')
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-black min-h-screen flex flex-col justify-center items-center lg:flex-row text-white p-4 lg:p-0 overflow-hidden">
+        
+        <div class="w-full lg:w-1/2 flex justify-center items-center h-full mb-10 lg:mb-0">
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="h-16 w-16 lg:h-[350px] lg:w-[350px] fill-current text-white cursor-default">
+                <g>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                </g>
+            </svg>
+        </div>
+
+        <div class="w-full lg:w-1/2 flex flex-col justify-center px-4 lg:pl-10 max-w-2xl">
+            
+            <div class="opacity-0 animate-enter">
+                <h1 class="text-5xl lg:text-7xl font-extrabold mb-12 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-400 to-[#1d9bf0] animate-gradient-x pb-2">
+                    Gestiona, envía <br>y monitorea
+                </h1>
             </div>
 
+            <div class="opacity-0 animate-enter delay-100">
+                <h2 class="text-3xl font-bold mb-8">Comienza a gestionar</h2>
+            </div>
+
+            <div class="w-full max-w-[300px] flex flex-col gap-3 opacity-0 animate-enter delay-200">
+                
+                <button class="btn bg-white text-black hover:bg-gray-200 border-none rounded-full capitalize text-base font-normal flex items-center gap-2 transition-transform active:scale-95">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5">
+                        <g>
+                            <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+                        </g>
+                    </svg>
+                    Registrarse con Google
+                </button>
+
+                <div class="flex items-center w-full my-1">
+                    <div class="h-px bg-gray-700 flex-1"></div>
+                    <span class="px-3 text-sm text-gray-200">o</span>
+                    <div class="h-px bg-gray-700 flex-1"></div>
+                </div>
+
+                <div class="w-full max-w-[300px] space-y-3">
+                    <button @click="registerOpen = true" class="w-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold py-2.5 px-4 rounded-full transition duration-200">
+                        Crear cuenta
+                    </button>
+                    
+                    <!-- <div class="text-[11px] text-gray-500 leading-tight">
+                        Al registrarte, aceptas los <a href="#" class="text-[#1d9bf0] hover:underline">Términos de servicio</a> y la <a href="#" class="text-[#1d9bf0] hover:underline">Política de privacidad</a>, incluida la política de <a href="#" class="text-[#1d9bf0] hover:underline">Uso de Cookies</a>.
+                    </div> -->
+
+                    <div class="pt-10">
+                        <h3 class="font-bold text-center text-[17px] mb-4">¿Ya tienes una cuenta?</h3>
+                        <button @click="loginOpen = true" class="w-full border border-gray-600 text-[#1d9bf0] font-bold py-2.5 px-4 rounded-full hover:bg-[rgba(29,155,240,0.1)] transition duration-200">
+                            Iniciar sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
