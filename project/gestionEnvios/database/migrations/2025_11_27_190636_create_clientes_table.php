@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('direccion');
             $table->string('telefono')->unique();
             $table->string('email')->unique();
-            $table->string('dui')->unique();
+            $table->string('dui')->unique(); 
             $table->string('nit')->unique();
             $table->timestamps();
         });

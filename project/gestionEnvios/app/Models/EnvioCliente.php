@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class envio_cliente extends Model
+class EnvioCliente extends Model
 {
     /** @use HasFactory<\Database\Factories\EnvioClienteFactory> */
     use HasFactory;
@@ -13,14 +13,14 @@ class envio_cliente extends Model
     protected $fillable = [
         'cliente_id',
         'paquete_id',
-        'tipo_cliente',
+        'tipo_cliente', // emisor o receptor
     ];
     public function cliente()
     {
-        return $this->belongsTo(cliente::class);
+        return $this->belongsTo(Cliente::class);
     }
     public function paquete()
     {
-        return $this->belongsTo(paquete::class);
+        return $this->belongsTo(Paquete::class);
     }
 }
