@@ -16,4 +16,8 @@ class Paquete extends Model
         'dimensiones',
         'tipo_envio',
     ];
+    public function envios()
+    {
+        return $this->hasMany(Envio::class);
+    }
 }

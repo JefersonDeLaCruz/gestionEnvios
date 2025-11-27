@@ -19,6 +19,7 @@ class EnvioFactory extends Factory
         return [
             'paquete_id' => fake()->numberBetween(1, 10),
             'vehiculo_id' => fake()->numberBetween(1, 10),
+            'motorista_id' => fake()->numberBetween(1),
             'estado_envio_id' => fake()->numberBetween(1, 3),
             'fecha_estimada' => fake()->date(),
             'costo' => fake()->numberBetween(1, 500),

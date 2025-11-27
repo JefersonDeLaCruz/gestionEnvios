@@ -15,4 +15,8 @@ class EstadoEnvio extends Model
         'slug',
         'es_final',
     ];
+    public function envios()
+    {
+        return $this->hasMany(Envio::class);
+    }
 }

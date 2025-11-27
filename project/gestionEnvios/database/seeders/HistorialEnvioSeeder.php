@@ -4,18 +4,14 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Envio;
-use App\Models\User;
-class EnvioSeeder extends Seeder
+use App\Models\HistorialEnvio;
+class HistorialEnvioSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $users = User::all();
-        Envio::factory()->count(10)->   create([
-            'motorista_id' => $users->random()->id,
-        ]);
+        HistorialEnvio::factory()->count(10)->create();
     }
 }
