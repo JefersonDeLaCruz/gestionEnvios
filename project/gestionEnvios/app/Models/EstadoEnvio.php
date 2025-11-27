@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class EstadoEnvio extends Model
+{
+    /** @use HasFactory<\Database\Factories\EstadoEnvioFactory> */
+    use HasFactory;
+    protected $table = 'estado_envios';
+    protected $fillable = [
+        'nombre',
+        'slug',
+        'es_final',
+    ];
+    public function envios()
+    {
+        return $this->hasMany(Envio::class);
+    }
+}
