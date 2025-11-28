@@ -13,8 +13,8 @@ class LoginForm extends Component
     public function login()
     {
         $this->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+            'email'     => 'required|email',
+            'password'  => 'required',
         ]);
 
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password])) {

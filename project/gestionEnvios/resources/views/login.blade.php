@@ -1,6 +1,6 @@
 @extends('layout.base')
 
-@section('title', 'Bienvenido / Logística')
+@section('title', 'Login | PACXPRESS')
 
 @section('content')
     <style>
