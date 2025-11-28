@@ -38,4 +38,4 @@ RUN chown -R laravel:laravel /var/www/html
 USER laravel
 
 WORKDIR /var/www/html
-EXPOSE 80
+EXPOSE 8000

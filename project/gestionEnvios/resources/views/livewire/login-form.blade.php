@@ -27,13 +27,13 @@
 
             <form wire:submit="login" class="space-y-4">
                 <div class="relative group">
-                    <input type="email" wire:model="email" id="email" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-white bg-transparent rounded-md border border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer" placeholder=" " />
+                    <input type="email" wire:model.live="email" id="email" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-white bg-transparent rounded-md border border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer" placeholder=" " />
                     <label for="email" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-black px-2 peer-focus:px-2 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">Teléfono, correo electrónico o nombre de usuario</label>
                     @error('email') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="relative group">
-                    <input type="password" wire:model="password" id="password" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-white bg-transparent rounded-md border border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer" placeholder=" " />
+                    <input type="password" wire:model.live="password" id="password" class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-white bg-transparent rounded-md border border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer" placeholder=" " />
                     <label for="password" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-black px-2 peer-focus:px-2 peer-focus:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">Contraseña</label>
                     @error('password') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                 </div>
@@ -49,7 +49,7 @@
         </div>
         
         <p class="text-gray-500 text-sm mt-8">
-            ¿No tienes una cuenta? <a href="#" @click="$dispatch('open-register-modal')" class="text-blue-500 hover:underline">Regístrate</a>
+            ¿No tienes una cuenta? <a href="#" wire:click="irARegistro" class="text-blue-500 hover:underline">Regístrate</a>
         </p>
     </div>
 </div>

@@ -6,6 +6,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AdminController;
 
+use App\Livewire\LoginForm;
+
+
+
+
+
+
+
 Route::get('/test', function () {
     return view('test');
 });
@@ -19,5 +27,7 @@ Route::controller(LoginController::class)->group(function () {
     Route::post('/register', 'register')->name('register');
 
 });
+
+Route::get('/formulario', LoginForm::class);
 
 Route::get('/admin', [AdminController::class, 'index'])->name('admin');

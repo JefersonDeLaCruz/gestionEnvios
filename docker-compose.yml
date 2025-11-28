@@ -9,6 +9,7 @@ services:
     ports:
       - "8080:80"
       - "5173:5173"
+      - "8085:8000"
     volumes:
       - ./project:/var/www/html:delegated
     depends_on:

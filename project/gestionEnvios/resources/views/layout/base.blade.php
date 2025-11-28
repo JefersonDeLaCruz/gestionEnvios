@@ -22,5 +22,6 @@
         @yield('footer')
     </footer>
     @livewireScripts
+ 
 </body>
 </html>
