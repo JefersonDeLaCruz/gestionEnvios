@@ -142,6 +142,9 @@
 
                 <div class="w-full max-w-[300px] flex flex-col gap-3 opacity-0 animate-enter delay-200">
 
+                    <a href="{{ route('home') }}" class="btn btn-ghost rounded-full">
+                        Ir a Inicio   
+                    </a>
 
                     <div class="flex items-center w-full my-1">
                         <div class="h-px bg-base-300 flex-1"></div>
