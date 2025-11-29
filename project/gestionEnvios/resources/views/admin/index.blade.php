@@ -2,7 +2,6 @@
 
 @section('title', 'Home')
 @section('content')
-
 @endsection
 @section('sidebar')
     @include('layout.admin-sidebar')
