@@ -33,7 +33,19 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             Session::put('user', $credentials);
-            return redirect()->route('admin');
+            
+            // Obtener el usuario autenticado
+            $user = Auth::user();
+            
+            // Redirigir según el rol del usuario
+            if ($user->hasRole('admin')) {
+                return redirect()->route('admin');
+            } elseif ($user->hasRole('repartidor')) {
+                return redirect()->route('repartidor');
+            }
+            
+            // Si no tiene ningún rol específico, redirigir a home
+            return redirect()->route('home');
         }
 
         return back()->withErrors([
@@ -50,21 +62,28 @@ class LoginController extends Controller
 
     public function register(Request $request) // registrar un nuevo usuario
     {
-        $credentials = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:255'],
+        $validatedData = $request->validate([
+            'nombre' => ['required', 'string', 'max:50'],
+            'apellido' => ['required', 'string', 'max:50'],
+            'telefono' => ['required', 'string', 'min:8', 'max:12'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
 
-        $user = User::create($credentials);
+        $user = User::create([
+            'nombre' => $validatedData['nombre'],
+            'apellido' => $validatedData['apellido'],
+            'telefono' => $validatedData['telefono'],
+            'email' => $validatedData['email'],
+            'password' => Hash::make($validatedData['password']),
+            'direccion' => 'N/A', // Temporal hasta agregar campo al formulario
+        ]);
 
         Auth::login($user);   
 
-        Session::put('user', $credentials);
+        Session::put('user', $validatedData);
 
-        return redirect()->route('home');
+        return redirect()->route('home')->with('success', 'Registro exitoso! Bienvenido!');
     }
     
     

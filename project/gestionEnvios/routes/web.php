@@ -5,7 +5,7 @@ use App\Http\Controllers\ClienteController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AdminController;
-
+use App\Http\Controllers\RepartidorController;
 use App\Livewire\LoginForm;
 
 
@@ -31,3 +31,5 @@ Route::controller(LoginController::class)->group(function () {
 Route::get('/formulario', LoginForm::class);
 
 Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+
+Route::get('/repartidor', [RepartidorController::class, 'index'])->name('repartidor');
