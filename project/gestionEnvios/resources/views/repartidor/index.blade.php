@@ -10,3 +10,7 @@
 @section('footer')
     @include('layout.footer')
 @endsection
+
+
+
+<h1>Repartidor</h1>

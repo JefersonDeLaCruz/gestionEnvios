@@ -3,21 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;        
+use Illuminate\Support\Facades\Session;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;    
 
 class LoginController extends Controller
 {
-    
+
 
     public function index() // mostrar la vista de login
     {
         return view('login');
-    }   
+    }
 
     public function login(Request $request) // iniciar sesión
     {
@@ -35,15 +35,16 @@ class LoginController extends Controller
             Session::put('user', $credentials);
             
             // Obtener el usuario autenticado
+            /** @var \App\Models\User $user */
             $user = Auth::user();
-            
+
             // Redirigir según el rol del usuario
             if ($user->hasRole('admin')) {
                 return redirect()->route('admin');
             } elseif ($user->hasRole('repartidor')) {
                 return redirect()->route('repartidor');
             }
-            
+
             // Si no tiene ningún rol específico, redirigir a home
             return redirect()->route('home');
         }
@@ -79,14 +80,10 @@ class LoginController extends Controller
             'direccion' => 'N/A', // Temporal hasta agregar campo al formulario
         ]);
 
-        Auth::login($user);   
+        Auth::login($user);
 
         Session::put('user', $validatedData);
 
         return redirect()->route('home')->with('success', 'Registro exitoso! Bienvenido!');
     }
-    
-    
-
-    
 }
