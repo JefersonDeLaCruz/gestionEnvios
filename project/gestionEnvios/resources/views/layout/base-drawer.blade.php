@@ -19,10 +19,16 @@
             @include('layout.navbar')
             <!-- Page content here -->
             <main>
-                @yield('content')
+                {{ $slot }}
             </main>
         </div>
-        @yield('sidebar')
+        <!-- Sidebar -->
+         <!-- IMPORTANTE -->
+        @if(Auth::user()->hasRole('repartidor'))
+            @include('layout.repartidor-sidebar')
+        @elseif(Auth::user()->hasRole('admin'))
+            @include('layout.admin-sidebar')
+        @endif
     </div>
 
 
