@@ -17,7 +17,7 @@
         <div class="drawer-content flex flex-col">
 
             @persist('navbar')
-            @include('layout.navbar')
+                @include('layout.navbar')
             @endpersist
             <main>
                 {{ $slot }}
@@ -26,9 +26,13 @@
         <!-- Sidebar -->
         <!-- IMPORTANTE -->
         @if(Auth::user()->hasRole('repartidor'))
+
             @include('layout.repartidor-sidebar')
+
         @elseif(Auth::user()->hasRole('admin'))
+
             @include('layout.admin-sidebar')
+
         @endif
     </div>
 
