@@ -15,9 +15,10 @@
     <div class="drawer lg:drawer-open">
         <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col">
-            <!-- Navbar -->
-            @include('layout.navbar')
-            <!-- Page content here -->
+           
+            @persist('navbar')
+                @include('layout.navbar')
+            @endpersist
             <main>
                 {{ $slot }}
             </main>
@@ -30,6 +31,7 @@
             @include('layout.admin-sidebar')
         @endif
     </div>
+
 
 
     @livewireScripts
