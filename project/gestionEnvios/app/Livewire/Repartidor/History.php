@@ -8,6 +8,7 @@ class History extends Component
 {
     public function render()
     {
-        return view('livewire.repartidor.history');
+        return view('livewire.repartidor.history')
+            ->layout('layout.base-drawer');
     }
 }

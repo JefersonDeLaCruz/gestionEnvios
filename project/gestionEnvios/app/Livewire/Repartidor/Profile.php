@@ -8,6 +8,7 @@ class Profile extends Component
 {
     public function render()
     {
-        return view('livewire.repartidor.profile');
+        return view('livewire.repartidor.profile')
+            ->layout('layout.base-drawer');
     }
 }

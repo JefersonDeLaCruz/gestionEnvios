@@ -8,6 +8,7 @@ class Packages extends Component
 {
     public function render()
     {
-        return view('livewire.repartidor.packages');
+        return view('livewire.repartidor.packages')
+            ->layout('layout.base-drawer');
     }
 }
