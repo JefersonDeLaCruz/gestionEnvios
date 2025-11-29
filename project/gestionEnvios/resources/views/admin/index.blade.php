@@ -3,7 +3,13 @@
 @section('title', 'Home')
 @section('content')
 
+@if (Auth::user()->hasRole('admin'))
 {{-- render del content --}}
+
+@endif
+
+
+
 
 @endsection
 @section('sidebar')
