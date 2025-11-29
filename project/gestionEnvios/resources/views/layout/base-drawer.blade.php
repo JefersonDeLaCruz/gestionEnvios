@@ -15,16 +15,16 @@
     <div class="drawer lg:drawer-open">
         <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col">
-           
+
             @persist('navbar')
-                @include('layout.navbar')
+            @include('layout.navbar')
             @endpersist
             <main>
                 {{ $slot }}
             </main>
         </div>
         <!-- Sidebar -->
-         <!-- IMPORTANTE -->
+        <!-- IMPORTANTE -->
         @if(Auth::user()->hasRole('repartidor'))
             @include('layout.repartidor-sidebar')
         @elseif(Auth::user()->hasRole('admin'))
@@ -33,6 +33,17 @@
     </div>
 
 
+
+    <script>
+        // Fix theme persistence with Livewire navigation
+        document.addEventListener('livewire:navigated', () => {
+            // Manually reapply theme from localStorage after Livewire navigation
+            const theme = localStorage.getItem('theme');
+            if (theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+        });
+    </script>
 
     @livewireScripts
 </body>
