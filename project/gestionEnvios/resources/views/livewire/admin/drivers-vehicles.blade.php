@@ -82,7 +82,7 @@
                                                 </button>
                                             @endif
                                             <button wire:click="deleteDriver({{ $driver->id }})"
-                                                onclick="return confirm('¿Estás seguro de eliminar este repartidor?')"
+                                                wire:confirm="¿Estás seguro de eliminar este repartidor?"
                                                 class="btn btn-error btn-xs">
                                                 Eliminar
                                             </button>
@@ -172,7 +172,7 @@
                                                 Editar
                                             </button>
                                             <button wire:click="deleteVehicle({{ $vehicle->id }})"
-                                                onclick="return confirm('¿Estás seguro de eliminar este vehículo?')"
+                                                wire:confirm="¿Estás seguro de eliminar este vehículo?"
                                                 class="btn btn-error btn-xs">
                                                 Eliminar
                                             </button>
@@ -317,7 +317,7 @@
         </div>
     </div>
     @endif
-</div>
+
     {{-- Vehicle Modal (Create/Edit) --}}
     @if($showVehicleModal)
     <div class="modal modal-open">
@@ -518,3 +518,4 @@
         </div>
     </div>
     @endif
+</div>
