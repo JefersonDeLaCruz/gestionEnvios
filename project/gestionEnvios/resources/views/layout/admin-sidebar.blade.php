@@ -49,6 +49,18 @@
                     <span class="font-medium">Repartidores y Vehículos</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('admin.all-shipments') }}" wire:navigate
+                    class="flex is-drawer-close:tooltip is-drawer-close:tooltip-right {{ request()->routeIs('admin.all-shipments') ? 'active' : '' }}"
+                    data-tip="Todos los Envíos">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="my-1.5 inline-block size-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                    </svg>
+                    <span class="font-medium">Todos los Envíos</span>
+                </a>
+            </li>
 
             <li>
                 <a href="{{ route('admin.users') }}" wire:navigate

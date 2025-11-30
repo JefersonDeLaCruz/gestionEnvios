@@ -34,6 +34,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('admin.dashboard');
         Route::get('/packages', \App\Livewire\Admin\Packages::class)->name('admin.packages');
         Route::get('/drivers-vehicles', \App\Livewire\Admin\DriversVehicles::class)->name('admin.drivers-vehicles');
+        Route::get('/all-shipments', \App\Livewire\Admin\AllShipments::class)->name('admin.all-shipments');
         Route::get('/users', \App\Livewire\Admin\Users::class)->name('admin.users');
         Route::get('/fleet', \App\Livewire\Admin\Fleet::class)->name('admin.fleet');
         Route::get('/reports', \App\Livewire\Admin\Reports::class)->name('admin.reports');
