@@ -57,7 +57,7 @@
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
                     </svg>
-                    <span class="font-medium">Reportes</span>
+                    <span class="font-medium">Reportes e Historial</span>
                 </a>
             </li>
 

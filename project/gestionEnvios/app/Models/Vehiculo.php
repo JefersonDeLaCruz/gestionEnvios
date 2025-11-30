@@ -11,6 +11,7 @@ class Vehiculo extends Model
     use HasFactory;
     protected $table = 'vehiculos';
     protected $fillable = [
+        'tipo_vehiculo_id',
         'numero_placas',
         'marca',
         'modelo',
@@ -18,4 +19,9 @@ class Vehiculo extends Model
         'capacidad_m3',
         'disponible',
     ];
+
+    public function tipoVehiculo()
+    {
+        return $this->belongsTo(TipoVehiculo::class);
+    }
 }

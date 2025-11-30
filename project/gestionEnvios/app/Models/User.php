@@ -50,4 +50,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the deliveries assigned to this user (delivery driver).
+     */
+    public function envios()
+    {
+        return $this->hasMany(Envio::class, 'motorista_id');
+    }
 }
