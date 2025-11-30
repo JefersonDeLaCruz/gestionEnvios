@@ -16,7 +16,7 @@
             <h1 class="text-3xl font-bold">Gestión de Paquetes</h1>
             <p class="text-base-content/70 mt-1">Administra todos los paquetes y envíos</p>
         </div>
-        <button wire:click="openModal" class="btn btn-primary gap-2">
+        <button wire:click="openModal" class="btn btn-primary gap-2 btn-sm md:btn-md">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                 stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -131,7 +131,7 @@
     <!-- Modal for New Shipment - Multi-Step Wizard -->
     @if($showModal)
         <div class="modal modal-open">
-            <div class="modal-box max-w-lg">
+            <div class="modal-box max-w-lg border border-base-300">
                 <!-- Modal Header -->
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-base-content">Nuevo Envío</h2>
@@ -453,7 +453,7 @@
     <!-- Driver Assignment Modal -->
     @if($showAssignModal)
         <div class="modal modal-open">
-            <div class="modal-box max-w-2xl">
+            <div class="modal-box max-w-2xl border border-base-300">
                 <!-- Modal Header -->
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-base-content">Asignar Repartidor</h2>

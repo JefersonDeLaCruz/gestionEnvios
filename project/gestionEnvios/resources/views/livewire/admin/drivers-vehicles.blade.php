@@ -21,7 +21,7 @@
         <div class="card-body">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="card-title">Repartidores</h2>
-                <button wire:click="openDriverModal" class="btn btn-primary gap-2">
+                <button wire:click="openDriverModal" class="btn btn-primary gap-2 btn-sm md:btn-md">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                         stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -66,14 +66,15 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="flex gap-2">
+                                        <div class="flex flex-wrap gap-2 items-center">
                                             <button wire:click="openDriverModal({{ $driver->id }})"
                                                 class="btn btn-ghost btn-xs">
                                                 Editar
                                             </button>
                                             <button wire:click="openAssignmentModal({{ $driver->id }})"
-                                                class="btn btn-primary btn-xs">
-                                                {{ $assignedVehicle ? 'Cambiar' : 'Asignar' }} Vehículo
+                                                class="btn btn-primary btn-xs h-auto py-2">
+                                                <span class="block sm:inline">{{ $assignedVehicle ? 'Cambiar' : 'Asignar' }}</span>
+                                                <span class="block sm:inline">Vehículo</span>
                                             </button>
                                             @if($assignedVehicle)
                                                 <button wire:click="unassignVehicle({{ $driver->id }})"
@@ -112,7 +113,7 @@
         <div class="card-body">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="card-title">Vehículos</h2>
-                <button wire:click="openVehicleModal" class="btn btn-primary gap-2">
+                <button wire:click="openVehicleModal" class="btn btn-primary gap-2 btn-sm md:btn-md">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                         stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -200,7 +201,7 @@
     {{-- Driver Modal (Create/Edit) --}}
     @if($showDriverModal)
     <div class="modal modal-open">
-        <div class="modal-box max-w-2xl">
+        <div class="modal-box max-w-2xl border border-base-300">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold">{{ $editingDriverId ? 'Editar' : 'Nuevo' }} Repartidor</h2>
                 <button wire:click="closeDriverModal" class="btn btn-sm btn-circle btn-ghost">
@@ -321,7 +322,7 @@
     {{-- Vehicle Modal (Create/Edit) --}}
     @if($showVehicleModal)
     <div class="modal modal-open">
-        <div class="modal-box max-w-2xl">
+        <div class="modal-box max-w-2xl border border-base-300">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold">{{ $editingVehicleId ? 'Editar' : 'Nuevo' }} Vehículo</h2>
                 <button wire:click="closeVehicleModal" class="btn btn-sm btn-circle btn-ghost">
@@ -450,7 +451,7 @@
     {{-- Assignment Modal --}}
     @if($showAssignmentModal)
     <div class="modal modal-open">
-        <div class="modal-box max-w-2xl">
+        <div class="modal-box max-w-2xl border border-base-300">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl font-bold">Asignar Vehículo</h2>
                 <button wire:click="closeAssignmentModal" class="btn btn-sm btn-circle btn-ghost">

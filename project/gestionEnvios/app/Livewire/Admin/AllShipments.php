@@ -56,4 +56,28 @@ class AllShipments extends Component
             'statuses' => $statuses
         ])->layout('layout.base-drawer');
     }
+
+    // Modal Details Logic
+    public $showDetailsModal = false;
+    public $selectedShipment = null;
+
+    public function openDetailsModal($shipmentId)
+    {
+        $this->selectedShipment = Envio::with([
+            'paquete',
+            'paquete.envioClientes.cliente',
+            'estadoEnvio',
+            'motorista',
+            'vehiculo',
+            'historialEnvios.estadoEnvio'
+        ])->findOrFail($shipmentId);
+
+        $this->showDetailsModal = true;
+    }
+
+    public function closeDetailsModal()
+    {
+        $this->showDetailsModal = false;
+        $this->selectedShipment = null;
+    }
 }

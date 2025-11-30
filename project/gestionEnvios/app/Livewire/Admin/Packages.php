@@ -193,6 +193,7 @@ class Packages extends Component
         ]);
 
         session()->flash('message', 'Envío creado exitosamente.');
+        $this->loadPendingShipments();
         $this->closeModal();
     }
 

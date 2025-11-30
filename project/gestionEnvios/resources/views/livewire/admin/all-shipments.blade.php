@@ -97,8 +97,7 @@
                                                     </td>
                                                     <td class="font-mono">${{ number_format($shipment->costo, 2) }}</td>
                                                     <td>
-                                                        {{-- Placeholder for future details modal/view --}}
-                                                        <button class="btn btn-ghost btn-xs">
+                                                        <button wire:click="openDetailsModal({{ $shipment->id }})" class="btn btn-ghost btn-xs">
                                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                                 stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -133,4 +132,161 @@
             </div>
         </div>
     </div>
+
+    {{-- Details Modal --}}
+    @if($showDetailsModal && $selectedShipment)
+        <div class="modal modal-open">
+            <div class="modal-box w-11/12 max-w-4xl border border-base-300">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="font-bold text-2xl flex items-center gap-3">
+                            Envío #{{ $selectedShipment->paquete->codigo }}
+                            <div class="badge {{ match ($selectedShipment->estadoEnvio->slug ?? '') {
+            'pendiente' => 'badge-warning',
+            'en-transito' => 'badge-info',
+            'entregado' => 'badge-success',
+            'cancelado' => 'badge-error',
+            default => 'badge-ghost'
+        } }} badge-lg">
+                                {{ $selectedShipment->estadoEnvio->nombre ?? 'Desconocido' }}
+                            </div>
+                        </h3>
+                        <p class="text-base-content/60 text-sm mt-1">
+                            Creado el {{ $selectedShipment->created_at->format('d/m/Y H:i') }}
+                        </p>
+                    </div>
+                    <button wire:click="closeDetailsModal" class="btn btn-circle btn-ghost btn-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Package Info --}}
+                    <div class="card bg-base-200">
+                        <div class="card-body p-4">
+                            <h4 class="card-title text-sm uppercase text-base-content/50 mb-2">Información del Paquete</h4>
+                            <div class="space-y-2">
+                                <p><span class="font-semibold">Descripción:</span>
+                                    {{ $selectedShipment->paquete->descripcion }}</p>
+                                <div class="flex gap-4">
+                                    <p><span class="font-semibold">Peso:</span> {{ $selectedShipment->paquete->peso }} lb
+                                    </p>
+                                    <p><span class="font-semibold">Dimensiones:</span>
+                                        {{ $selectedShipment->paquete->dimensiones ?? 'N/A' }}</p>
+                                </div>
+                                <p><span class="font-semibold">Tipo de Envío:</span> <span
+                                        class="badge badge-outline capitalize">{{ $selectedShipment->paquete->tipo_envio }}</span>
+                                </p>
+                                <p><span class="font-semibold">Costo:</span>
+                                    ${{ number_format($selectedShipment->costo, 2) }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Logistics Info --}}
+                    <div class="card bg-base-200">
+                        <div class="card-body p-4">
+                            <h4 class="card-title text-sm uppercase text-base-content/50 mb-2">Logística</h4>
+                            <div class="space-y-2">
+                                <p><span class="font-semibold">Fecha Estimada:</span>
+                                    {{ \Carbon\Carbon::parse($selectedShipment->fecha_estimada)->format('d/m/Y') }}</p>
+                                @if($selectedShipment->motorista)
+                                    <div class="flex items-center gap-3 mt-2">
+                                        <div class="avatar placeholder">
+                                            <div class="bg-neutral text-neutral-content rounded-full w-10">
+                                                <span>{{ substr($selectedShipment->motorista->nombre, 0, 1) }}</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold">{{ $selectedShipment->motorista->nombre }}
+                                                {{ $selectedShipment->motorista->apellido }}</p>
+                                            <p class="text-xs opacity-70">Repartidor</p>
+                                        </div>
+                                    </div>
+                                    @if($selectedShipment->vehiculo)
+                                        <p class="text-sm mt-2"><span class="font-semibold">Vehículo:</span>
+                                            {{ $selectedShipment->vehiculo->marca }} {{ $selectedShipment->vehiculo->modelo }}
+                                            ({{ $selectedShipment->vehiculo->numero_placas }})</p>
+                                    @endif
+                                @else
+                                    <div class="alert alert-warning py-2 text-sm mt-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6"
+                                            fill="none" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span>Sin repartidor asignado</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Sender Info --}}
+                    @php
+                        $remitente = $selectedShipment->paquete->envioClientes->where('tipo_cliente', 'emisor')->first()?->cliente;
+                    @endphp
+                    <div class="card border border-base-300">
+                        <div class="card-body p-4">
+                            <h4 class="card-title text-sm uppercase text-base-content/50 mb-2">Remitente (Origen)</h4>
+                            @if($remitente)
+                                <p class="font-bold text-lg">{{ $remitente->nombre }} {{ $remitente->apellido }}</p>
+                                <p class="text-sm flex items-start gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 opacity-70" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {{ $remitente->direccion }}
+                                </p>
+                                <div class="divider my-1"></div>
+                                <p class="text-sm"><span class="opacity-70">Tel:</span> {{ $remitente->telefono }}</p>
+                                <p class="text-sm"><span class="opacity-70">Email:</span> {{ $remitente->email }}</p>
+                            @else
+                                <p class="italic opacity-50">Información no disponible</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Receiver Info --}}
+                    @php
+                        $destinatario = $selectedShipment->paquete->envioClientes->where('tipo_cliente', 'receptor')->first()?->cliente;
+                    @endphp
+                    <div class="card border border-base-300">
+                        <div class="card-body p-4">
+                            <h4 class="card-title text-sm uppercase text-base-content/50 mb-2">Destinatario (Destino)</h4>
+                            @if($destinatario)
+                                <p class="font-bold text-lg">{{ $destinatario->nombre }} {{ $destinatario->apellido }}</p>
+                                <p class="text-sm flex items-start gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 opacity-70" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {{ $destinatario->direccion }}
+                                </p>
+                                <div class="divider my-1"></div>
+                                <p class="text-sm"><span class="opacity-70">Tel:</span> {{ $destinatario->telefono }}</p>
+                                <p class="text-sm"><span class="opacity-70">Email:</span> {{ $destinatario->email }}</p>
+                            @else
+                                <p class="italic opacity-50">Información no disponible</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-action">
+                    <button wire:click="closeDetailsModal" class="btn">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
