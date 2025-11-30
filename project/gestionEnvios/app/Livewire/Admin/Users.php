@@ -17,7 +17,7 @@ class Users extends Component
     public $showModal = false;
     public $showDeleteModal = false;
     public $editMode = false;
-    
+
     // User form fields
     public $userId;
     public $nombre;
@@ -28,6 +28,7 @@ class Users extends Component
     public $password;
     public $password_confirmation;
     public $estado = 1;
+    public $role = 'usuario';
 
     protected $paginationTheme = 'daisyui';
 
@@ -40,6 +41,7 @@ class Users extends Component
             'telefono' => 'required|string|max:20',
             'direccion' => 'required|string|max:255',
             'estado' => 'required|boolean',
+            'role' => 'required|in:usuario,repartidor,admin',
         ];
 
         if (!$this->editMode) {
@@ -60,6 +62,7 @@ class Users extends Component
         'password' => 'contraseña',
         'password_confirmation' => 'confirmación de contraseña',
         'estado' => 'estado',
+        'role' => 'rol',
     ];
 
     public function updatingSearch()
@@ -83,7 +86,7 @@ class Users extends Component
     {
         $this->resetForm();
         $user = User::findOrFail($userId);
-        
+
         $this->userId = $user->id;
         $this->nombre = $user->nombre;
         $this->apellido = $user->apellido;
@@ -91,7 +94,8 @@ class Users extends Component
         $this->telefono = $user->telefono;
         $this->direccion = $user->direccion;
         $this->estado = $user->estado;
-        
+        $this->role = $user->getRoleNames()->first() ?? 'usuario';
+
         $this->editMode = true;
         $this->showModal = true;
     }
@@ -114,8 +118,10 @@ class Users extends Component
         $this->password = '';
         $this->password_confirmation = '';
         $this->estado = 1;
+        $this->role = 'usuario';
     }
 
+    //funcion para guardar nuevo usuario
     public function save()
     {
         $this->validate();
@@ -135,7 +141,10 @@ class Users extends Component
                 $user->update(['password' => Hash::make($this->password)]);
             }
 
-            session()->flash('message', 'Repartidor actualizado exitosamente.');
+            // Sync the user's role
+            $user->syncRoles([$this->role]);
+
+            session()->flash('message', 'Usuario actualizado exitosamente.');
         } else {
             $user = User::create([
                 'nombre' => $this->nombre,
@@ -147,10 +156,10 @@ class Users extends Component
                 'estado' => $this->estado,
             ]);
 
-            // Assign the 'repartidor' role
-            $user->assignRole('repartidor');
+            // Assign the selected role
+            $user->assignRole($this->role);
 
-            session()->flash('message', 'Repartidor creado exitosamente.');
+            session()->flash('message', 'Usuario creado exitosamente.');
         }
 
         $this->closeModal();
@@ -160,9 +169,9 @@ class Users extends Component
     {
         $user = User::findOrFail($userId);
         $user->update(['estado' => !$user->estado]);
-        
+
         $status = $user->estado ? 'activado' : 'dado de baja';
-        session()->flash('message', "Repartidor {$status} exitosamente.");
+        session()->flash('message', "Usuario {$status} exitosamente.");
     }
 
     public function confirmDelete($userId)
@@ -174,11 +183,20 @@ class Users extends Component
     public function deleteUser()
     {
         $user = User::findOrFail($this->userId);
+
+        // Validar que el usuario no se esté eliminando a sí mismo
+        if ($user->id === auth()->id()) {
+            $this->showDeleteModal = false;
+            $this->userId = null;
+            session()->flash('error', 'No puedes eliminarte a ti mismo.');
+            return;
+        }
+
         $user->delete();
-        
+
         $this->showDeleteModal = false;
         $this->userId = null;
-        session()->flash('message', 'Repartidor eliminado exitosamente.');
+        session()->flash('message', 'Usuario eliminado exitosamente.');
     }
 
     public function cancelDelete()
@@ -189,14 +207,15 @@ class Users extends Component
 
     public function render()
     {
-        $query = User::role('repartidor');
+        // Obtener todos los usuarios con cualquier rol
+        $query = User::query();
 
         if ($this->search) {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->where('nombre', 'like', '%' . $this->search . '%')
-                  ->orWhere('apellido', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%')
-                  ->orWhere('telefono', 'like', '%' . $this->search . '%');
+                    ->orWhere('apellido', 'like', '%' . $this->search . '%')
+                    ->orWhere('email', 'like', '%' . $this->search . '%')
+                    ->orWhere('telefono', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -205,9 +224,9 @@ class Users extends Component
         }
 
         $users = $query->latest()->paginate(10);
-        $totalUsers = User::role('repartidor')->count();
-        $activeUsers = User::role('repartidor')->where('estado', 1)->count();
-        $inactiveUsers = User::role('repartidor')->where('estado', 0)->count();
+        $totalUsers = User::count();
+        $activeUsers = User::where('estado', 1)->count();
+        $inactiveUsers = User::where('estado', 0)->count();
 
         return view('livewire.admin.users', [
             'users' => $users,

@@ -400,11 +400,11 @@
             </div>
 
             {{-- Pagination --}}
-            @if($deliveries->hasPages())
+            {{-- @if($deliveries->hasPages())
                 <div class="mt-4">
                     {{ $deliveries->links() }}
                 </div>
-            @endif
+            @endif --}}
         </div>
     </div>
 </div>
