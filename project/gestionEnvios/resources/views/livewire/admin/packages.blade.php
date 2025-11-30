@@ -1,15 +1,27 @@
 <div class="p-6">
+    <!-- Success Message -->
+    @if (session()->has('message'))
+        <div class="alert alert-success mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ session('message') }}</span>
+        </div>
+    @endif
+
     <!-- Page Header -->
     <div class="mb-6 flex justify-between items-center">
         <div>
             <h1 class="text-3xl font-bold">Gestión de Paquetes</h1>
             <p class="text-base-content/70 mt-1">Administra todos los paquetes y envíos</p>
         </div>
-        <button class="btn btn-primary gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+        <button wire:click="openModal" class="btn btn-primary gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            Nuevo Paquete
+            Nuevo Envío
         </button>
     </div>
 
@@ -47,88 +59,497 @@
     <!-- Packages Table -->
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-            <div class="overflow-x-auto">
-                <table class="table table-zebra">
-                    <thead>
-                        <tr>
-                            <th>Seguimiento</th>
-                            <th>Cliente</th>
-                            <th>Destino</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="font-mono">#PKG001</td>
-                            <td>Juan Pérez</td>
-                            <td>Ciudad de México</td>
-                            <td><span class="badge badge-warning">En tránsito</span></td>
-                            <td>2025-11-28</td>
-                            <td>
-                                <button class="btn btn-ghost btn-xs">Ver</button>
-                                <button class="btn btn-ghost btn-xs">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="font-mono">#PKG002</td>
-                            <td>María González</td>
-                            <td>Guadalajara</td>
-                            <td><span class="badge badge-success">Entregado</span></td>
-                            <td>2025-11-27</td>
-                            <td>
-                                <button class="btn btn-ghost btn-xs">Ver</button>
-                                <button class="btn btn-ghost btn-xs">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="font-mono">#PKG003</td>
-                            <td>Carlos Ramírez</td>
-                            <td>Monterrey</td>
-                            <td><span class="badge badge-info">Pendiente</span></td>
-                            <td>2025-11-28</td>
-                            <td>
-                                <button class="btn btn-ghost btn-xs">Ver</button>
-                                <button class="btn btn-ghost btn-xs">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="font-mono">#PKG004</td>
-                            <td>Ana López</td>
-                            <td>Puebla</td>
-                            <td><span class="badge badge-warning">En tránsito</span></td>
-                            <td>2025-11-28</td>
-                            <td>
-                                <button class="btn btn-ghost btn-xs">Ver</button>
-                                <button class="btn btn-ghost btn-xs">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="font-mono">#PKG005</td>
-                            <td>Roberto Sánchez</td>
-                            <td>Cancún</td>
-                            <td><span class="badge badge-success">Entregado</span></td>
-                            <td>2025-11-26</td>
-                            <td>
-                                <button class="btn btn-ghost btn-xs">Ver</button>
-                                <button class="btn btn-ghost btn-xs">Editar</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            <div class="flex justify-center mt-4">
-                <div class="join">
-                    <button class="join-item btn btn-sm">«</button>
-                    <button class="join-item btn btn-sm btn-active">1</button>
-                    <button class="join-item btn btn-sm">2</button>
-                    <button class="join-item btn btn-sm">3</button>
-                    <button class="join-item btn btn-sm">»</button>
+            <h2 class="card-title mb-4">Paquetes Pendientes de Asignación</h2>
+
+            @if($pendingShipments->count() > 0)
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Emisor</th>
+                                <th>Receptor</th>
+                                <th>Descripción</th>
+                                <th>Peso</th>
+                                <th>Fecha Estimada</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($pendingShipments as $envio)
+                                @php
+                                    $emisor = $envio->paquete->envioClientes->where('tipo_cliente', 'emisor')->first()?->cliente;
+                                    $receptor = $envio->paquete->envioClientes->where('tipo_cliente', 'receptor')->first()?->cliente;
+                                @endphp
+                                <tr>
+                                    <td class="font-mono font-bold">{{ $envio->paquete->codigo }}</td>
+                                    <td>
+                                        <div class="font-medium">{{ $emisor?->nombre }} {{ $emisor?->apellido }}</div>
+                                        <div class="text-sm text-base-content/60">{{ $emisor?->telefono }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-medium">{{ $receptor?->nombre }} {{ $receptor?->apellido }}</div>
+                                        <div class="text-sm text-base-content/60">{{ $receptor?->direccion }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="max-w-xs truncate" title="{{ $envio->paquete->descripcion }}">
+                                            {{ $envio->paquete->descripcion }}
+                                        </div>
+                                    </td>
+                                    <td>{{ $envio->paquete->peso }} kg</td>
+                                    <td>{{ \Carbon\Carbon::parse($envio->fecha_estimada)->format('d/m/Y') }}</td>
+                                    <td>
+                                        <button wire:click="openAssignModal({{ $envio->id }})"
+                                            class="btn btn-primary btn-sm gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                            </svg>
+                                            Asignar Repartidor
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            @else
+                <div class="text-center py-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-16 h-16 mx-auto text-base-content/30 mb-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-base-content/70">No hay paquetes pendientes</h3>
+                    <p class="text-base-content/50 mt-2">Todos los paquetes tienen repartidores asignados</p>
+                </div>
+            @endif
         </div>
     </div>
+
+    <!-- Modal for New Shipment - Multi-Step Wizard -->
+    @if($showModal)
+        <div class="modal modal-open">
+            <div class="modal-box max-w-lg">
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-base-content">Nuevo Envío</h2>
+                    <button wire:click="closeModal" class="btn btn-sm btn-circle btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="mb-8">
+                    <ul class="steps steps-horizontal w-full">
+                        <li class="step {{ $currentStep >= 1 ? 'step-secondary' : '' }}">Emisor</li>
+                        <li class="step {{ $currentStep >= 2 ? 'step-secondary' : '' }}">Receptor</li>
+                        <li class="step {{ $currentStep >= 3 ? 'step-secondary' : '' }}">Paquete</li>
+                    </ul>
+                </div>
+
+                <form wire:submit.prevent="save">
+                    <!-- Step 1: Sender Information -->
+                    @if($currentStep === 1)
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-semibold text-base-content mb-4">Información del Emisor</h3>
+
+                            <!-- Nombre -->
+                            <div class="relative group">
+                                <input type="text" wire:model="sender_nombre" id="sender_nombre"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_nombre') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="sender_nombre"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Nombre <span class="text-error">*</span>
+                                </label>
+                                @error('sender_nombre') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Apellido -->
+                            <div class="relative group">
+                                <input type="text" wire:model="sender_apellido" id="sender_apellido"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_apellido') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="sender_apellido"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Apellido <span class="text-error">*</span>
+                                </label>
+                                @error('sender_apellido') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Dirección -->
+                            <div class="relative group">
+                                <textarea wire:model="sender_direccion" id="sender_direccion" rows="2"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_direccion') border-error @enderror"
+                                    placeholder=" "></textarea>
+                                <label for="sender_direccion"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Dirección <span class="text-error">*</span>
+                                </label>
+                                @error('sender_direccion') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div class="relative group">
+                                <input type="tel" wire:model="sender_telefono" id="sender_telefono"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_telefono') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="sender_telefono"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Teléfono <span class="text-error">*</span>
+                                </label>
+                                @error('sender_telefono') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Email -->
+                            <div class="relative group">
+                                <input type="email" wire:model="sender_email" id="sender_email"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_email') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="sender_email"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Email
+                                </label>
+                                @error('sender_email') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- DUI -->
+                            <div class="relative group">
+                                <input type="text" wire:model="sender_dui" id="sender_dui"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_dui') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="sender_dui"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    DUI
+                                </label>
+                                @error('sender_dui') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- NIT -->
+                            <div class="relative group">
+                                <input type="text" wire:model="sender_nit" id="sender_nit"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_nit') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="sender_nit"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    NIT
+                                </label>
+                                @error('sender_nit') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Step 2: Receiver Information -->
+                    @if($currentStep === 2)
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-semibold text-base-content mb-4">Información del Receptor</h3>
+
+                            <!-- Nombre -->
+                            <div class="relative group">
+                                <input type="text" wire:model="receiver_nombre" id="receiver_nombre"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_nombre') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="receiver_nombre"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Nombre <span class="text-error">*</span>
+                                </label>
+                                @error('receiver_nombre') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Apellido -->
+                            <div class="relative group">
+                                <input type="text" wire:model="receiver_apellido" id="receiver_apellido"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_apellido') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="receiver_apellido"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Apellido <span class="text-error">*</span>
+                                </label>
+                                @error('receiver_apellido') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Dirección -->
+                            <div class="relative group">
+                                <textarea wire:model="receiver_direccion" id="receiver_direccion" rows="2"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_direccion') border-error @enderror"
+                                    placeholder=" "></textarea>
+                                <label for="receiver_direccion"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Dirección <span class="text-error">*</span>
+                                </label>
+                                @error('receiver_direccion') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div class="relative group">
+                                <input type="tel" wire:model="receiver_telefono" id="receiver_telefono"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_telefono') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="receiver_telefono"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Teléfono <span class="text-error">*</span>
+                                </label>
+                                @error('receiver_telefono') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Email -->
+                            <div class="relative group">
+                                <input type="email" wire:model="receiver_email" id="receiver_email"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_email') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="receiver_email"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Email
+                                </label>
+                                @error('receiver_email') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- DUI -->
+                            <div class="relative group">
+                                <input type="text" wire:model="receiver_dui" id="receiver_dui"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_dui') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="receiver_dui"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    DUI
+                                </label>
+                                @error('receiver_dui') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- NIT -->
+                            <div class="relative group">
+                                <input type="text" wire:model="receiver_nit" id="receiver_nit"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_nit') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="receiver_nit"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    NIT
+                                </label>
+                                @error('receiver_nit') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Step 3: Package Information -->
+                    @if($currentStep === 3)
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-semibold text-base-content mb-4">Información del Paquete</h3>
+
+                            <!-- Descripción -->
+                            <div class="relative group">
+                                <textarea wire:model="descripcion" id="descripcion" rows="3"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('descripcion') border-error @enderror"
+                                    placeholder=" "></textarea>
+                                <label for="descripcion"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Descripción del Paquete <span class="text-error">*</span>
+                                </label>
+                                @error('descripcion') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Peso -->
+                            <div class="relative group">
+                                <input type="number" step="0.01" wire:model="peso" id="peso"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('peso') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="peso"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Peso (kg) <span class="text-error">*</span>
+                                </label>
+                                @error('peso') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+
+                            <!-- Dimensiones -->
+                            <div class="relative group">
+                                <input type="text" wire:model="dimensiones" id="dimensiones"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('dimensiones') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="dimensiones"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                                    Dimensiones (ej: 30x20x15 cm)
+                                </label>
+                                @error('dimensiones') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Tipo de Envío -->
+                            <div class="relative group">
+                                <select wire:model="tipo_envio" id="tipo_envio"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('tipo_envio') border-error @enderror">
+                                    <option value="estandar">Estándar</option>
+                                    <option value="express">Express</option>
+                                    <option value="overnight">Overnight</option>
+                                </select>
+                                <label for="tipo_envio"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary left-1">
+                                    Tipo de Envío <span class="text-error">*</span>
+                                </label>
+                                @error('tipo_envio') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <!-- Fecha Estimada -->
+                            <div class="relative group">
+                                <input type="date" wire:model="fecha_estimada" id="fecha_estimada"
+                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('fecha_estimada') border-error @enderror"
+                                    placeholder=" " />
+                                <label for="fecha_estimada"
+                                    class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary left-1">
+                                    Fecha Estimada de Entrega <span class="text-error">*</span>
+                                </label>
+                                @error('fecha_estimada') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between items-center mt-8">
+                        @if($currentStep > 1)
+                            <button type="button" wire:click="previousStep" class="btn btn-ghost rounded-full font-bold">
+                                Anterior
+                            </button>
+                        @else
+                            <div></div>
+                        @endif
+
+                        @if($currentStep < 3)
+                            <button type="button" wire:click="nextStep"
+                                class="w-full btn btn-outline rounded-full py-2.5 px-4 font-bold transition {{ $currentStep > 1 ? 'max-w-xs' : '' }}">
+                                Siguiente
+                            </button>
+                        @else
+                            <button type="submit"
+                                class="w-full btn btn-outline rounded-full py-2.5 px-4 font-bold transition max-w-xs">
+                                Crear Envío
+                            </button>
+                        @endif
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    <!-- Driver Assignment Modal -->
+    @if($showAssignModal)
+        <div class="modal modal-open">
+            <div class="modal-box max-w-2xl">
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-base-content">Asignar Repartidor</h2>
+                    <button wire:click="closeAssignModal" class="btn btn-sm btn-circle btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                @if(session()->has('error'))
+                    <div class="alert alert-error mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+
+                <form wire:submit.prevent="assignDriver">
+                    @if($availableDrivers->count() > 0)
+                        <div class="space-y-4">
+                            <p class="text-base-content/70 mb-4">Selecciona un repartidor con vehículo disponible:</p>
+
+                            @foreach($availableDrivers as $driver)
+                                @php
+                                    $vehicle = $driver->vehiculoActivo();
+                                @endphp
+                                <label
+                                    class="flex items-center gap-4 p-4 border border-base-300 rounded-lg cursor-pointer hover:bg-base-200 transition {{ $selectedDriverId == $driver->id ? 'bg-secondary/10 border-secondary' : '' }}">
+                                    <input type="radio" wire:model.live="selectedDriverId" value="{{ $driver->id }}"
+                                        class="radio radio-secondary" />
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3">
+                                            <div class="avatar placeholder">
+                                                <div class="bg-secondary text-secondary-content rounded-full w-12">
+                                                    <span
+                                                        class="text-xl">{{ substr($driver->nombre, 0, 1) }}{{ substr($driver->apellido, 0, 1) }}</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-lg">{{ $driver->nombre }} {{ $driver->apellido }}</div>
+                                                <div class="text-sm text-base-content/60">{{ $driver->email }}</div>
+                                            </div>
+                                        </div>
+                                        @if($vehicle)
+                                            <div class="mt-3 flex items-center gap-2 text-sm">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-secondary">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                                                </svg>
+                                                <span class="font-medium">{{ $vehicle->marca }} {{ $vehicle->modelo }}</span>
+                                                <span class="badge badge-sm">{{ $vehicle->numero_placas }}</span>
+                                                <span class="text-base-content/60">• Capacidad: {{ $vehicle->capacidad_kg }} kg</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+
+                        <div class="modal-action">
+                            <button type="button" wire:click="closeAssignModal" class="btn btn-ghost rounded-full font-bold">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary rounded-full font-bold gap-2"
+                                @disabled(!$selectedDriverId)>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                                Asignar Repartidor
+                            </button>
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="w-16 h-16 mx-auto text-base-content/30 mb-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                            </svg>
+                            <h3 class="text-lg font-semibold text-base-content/70">No hay repartidores disponibles</h3>
+                            <p class="text-base-content/50 mt-2">Todos los repartidores están ocupados o no tienen vehículos
+                                asignados</p>
+                            <button type="button" wire:click="closeAssignModal"
+                                class="btn btn-ghost rounded-full font-bold mt-4">
+                                Cerrar
+                            </button>
+                        </div>
+                    @endif
+                </form>
+            </div>
+        </div>
+    @endif
 </div>

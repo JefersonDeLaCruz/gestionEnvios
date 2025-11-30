@@ -24,4 +24,14 @@ class Vehiculo extends Model
     {
         return $this->belongsTo(TipoVehiculo::class);
     }
+
+    /**
+     * Get the drivers (motoristas) assigned to this vehicle
+     */
+    public function motoristas()
+    {
+        return $this->belongsToMany(User::class, 'motorista_vehiculo', 'vehiculo_id', 'motorista_id')
+            ->withPivot('activo')
+            ->withTimestamps();
+    }
 }

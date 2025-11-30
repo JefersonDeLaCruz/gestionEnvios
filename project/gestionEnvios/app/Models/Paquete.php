@@ -12,6 +12,7 @@ class Paquete extends Model
     protected $table = 'paquetes';
     protected $fillable = [
         'codigo',
+        'descripcion',
         'peso',
         'dimensiones',
         'tipo_envio',
@@ -19,5 +20,10 @@ class Paquete extends Model
     public function envios()
     {
         return $this->hasMany(Envio::class);
+    }
+
+    public function envioClientes()
+    {
+        return $this->hasMany(EnvioCliente::class);
     }
 }

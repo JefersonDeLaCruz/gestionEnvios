@@ -58,4 +58,22 @@ class User extends Authenticatable
     {
         return $this->hasMany(Envio::class, 'motorista_id');
     }
+
+    /**
+     * Get the vehicles assigned to this driver (motorista)
+     */
+    public function vehiculos()
+    {
+        return $this->belongsToMany(Vehiculo::class, 'motorista_vehiculo', 'motorista_id', 'vehiculo_id')
+            ->withPivot('activo')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the currently active vehicle for this driver
+     */
+    public function vehiculoActivo()
+    {
+        return $this->vehiculos()->wherePivot('activo', true)->first();
+    }
 }

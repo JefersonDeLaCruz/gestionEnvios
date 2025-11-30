@@ -33,6 +33,7 @@ Route::middleware(['auth', 'role:admin'])
     ->group(function () {
         Route::get('/dashboard', \App\Livewire\Admin\Dashboard::class)->name('admin.dashboard');
         Route::get('/packages', \App\Livewire\Admin\Packages::class)->name('admin.packages');
+        Route::get('/drivers-vehicles', \App\Livewire\Admin\DriversVehicles::class)->name('admin.drivers-vehicles');
         Route::get('/users', \App\Livewire\Admin\Users::class)->name('admin.users');
         Route::get('/fleet', \App\Livewire\Admin\Fleet::class)->name('admin.fleet');
         Route::get('/reports', \App\Livewire\Admin\Reports::class)->name('admin.reports');
@@ -61,7 +62,7 @@ Route::middleware(['auth', 'role:repartidor'])
 // Redirecciones
 // =======================
 
-Route::get('/admin', fn () => redirect()->route('admin.dashboard'))->name('admin');
-Route::get('/repartidor', fn () => redirect()->route('repartidor.dashboard'))->name('repartidor');
+Route::get('/admin', fn() => redirect()->route('admin.dashboard'))->name('admin');
+Route::get('/repartidor', fn() => redirect()->route('repartidor.dashboard'))->name('repartidor');
 
 

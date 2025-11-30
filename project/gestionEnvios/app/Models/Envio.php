@@ -38,4 +38,13 @@ class Envio extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Scope to get pending shipments (no assigned driver)
+     */
+    public function scopePendientes($query)
+    {
+        return $query->whereNull('motorista_id')
+            ->whereNull('vehiculo_id');
+    }
 }
