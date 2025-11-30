@@ -52,7 +52,7 @@
   <div class="navbar-center hidden lg:flex">
   </div>
   <div class="navbar-end">
-    <ul class="menu menu-horizontal px-1">
+    <ul class="menu menu-horizontal px-1 items-center">
       <li>
         @if (!Auth::check())
           <a href="{{ route('login') }}" class="btn btn-ghost font-bold">
@@ -60,27 +60,25 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
               class="lucide lucide-log-in-icon lucide-log-in">
-            <path d="m10 17 5-5-5-5" />
-            <path d="M15 12H3" />
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-          </svg>
-        </a>
+              <path d="m10 17 5-5-5-5" />
+              <path d="M15 12H3" />
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            </svg>
+          </a>
         @else
-        <form method="POST" action="{{ route('logout') }}">
-          @csrf
-          <button type="submit" class="btn btn-ghost font-bold">
-            Salir
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-log-out-icon lucide-log-out">
-            <path d="m10 17 5-5-5-5" />
-            <path d="M15 12H3" />
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-            <path d="M9 22v-7" />
-            <path d="M15 22v-7" />
-          </svg>
-        </button>
-        </form>
+          <form method="POST" action="{{ route('logout') }}" class="flex items-center">
+            @csrf
+            <button type="submit" class="btn btn-ghost font-bold flex items-center gap-2">
+              Salir
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-log-out-icon lucide-log-out w-5 h-5">
+                <path d="m16 17 5-5-5-5" />
+                <path d="M21 12H9" />
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              </svg>
+            </button>
+          </form>
         @endif
       </li>
       <li class="hidden lg:flex">
