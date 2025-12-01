@@ -231,36 +231,15 @@
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <h3 class="card-title text-lg">{{ $tipo->nombre }}</h3>
-                                        @if($tipo->descripcion)
-                                            <p class="text-sm text-base-content/70 mt-1">{{ $tipo->descripcion }}</p>
-                                        @endif
+                                        
                                     </div>
-                                    <div class="badge {{ $tipo->activo ? 'badge-success' : 'badge-error' }}">
-                                        {{ $tipo->activo ? 'Activo' : 'Inactivo' }}
-                                    </div>
+                                    
                                 </div>
 
-                                <div class="divider my-2"></div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="stat bg-base-100 rounded-lg p-3">
-                                        <div class="stat-title text-xs">Cap. Máxima</div>
-                                        <div class="stat-value text-lg">{{ $tipo->capacidad_max_kg ?? 'N/A' }}</div>
-                                        <div class="stat-desc">kilogramos</div>
-                                    </div>
-                                    <div class="stat bg-base-100 rounded-lg p-3">
-                                        <div class="stat-title text-xs">Volumen</div>
-                                        <div class="stat-value text-lg">{{ $tipo->capacidad_max_m3 ?? 'N/A' }}</div>
-                                        <div class="stat-desc">metros cúbicos</div>
-                                    </div>
-                                </div>
+                                
 
                                 <div class="card-actions justify-end mt-4">
-                                    <button wire:click="toggleTipoVehiculoActivo({{ $tipo->id }})" class="btn btn-ghost btn-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414" />
-                                        </svg>
-                                    </button>
+                                   
                                     <button wire:click="openEditTipoVehiculoModal({{ $tipo->id }})" class="btn btn-ghost btn-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -434,45 +413,7 @@
                         @enderror
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text">Capacidad Máx. (kg)</span>
-                            </label>
-                            <input type="number" step="0.01" wire:model="tipoVehiculoCapacidadKg" class="input input-bordered @error('tipoVehiculoCapacidadKg') input-error @enderror" placeholder="1000.00" />
-                            @error('tipoVehiculoCapacidadKg')
-                                <label class="label">
-                                    <span class="label-text-alt text-error">{{ $message }}</span>
-                                </label>
-                            @enderror
-                        </div>
-
-                        <div class="form-control">
-                            <label class="label">
-                                <span class="label-text">Volumen (m³)</span>
-                            </label>
-                            <input type="number" step="0.01" wire:model="tipoVehiculoCapacidadM3" class="input input-bordered @error('tipoVehiculoCapacidadM3') input-error @enderror" placeholder="10.00" />
-                            @error('tipoVehiculoCapacidadM3')
-                                <label class="label">
-                                    <span class="label-text-alt text-error">{{ $message }}</span>
-                                </label>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="form-control mb-4">
-                        <label class="label">
-                            <span class="label-text">Descripción</span>
-                        </label>
-                        <textarea wire:model="tipoVehiculoDescripcion" class="textarea textarea-bordered" rows="2" placeholder="Descripción del tipo de vehículo..."></textarea>
-                    </div>
-
-                    <div class="form-control mb-4">
-                        <label class="label cursor-pointer justify-start gap-4">
-                            <input type="checkbox" wire:model="tipoVehiculoActivo" class="toggle toggle-success" />
-                            <span class="label-text font-semibold">Tipo Activo</span>
-                        </label>
-                    </div>
+                   
 
                     <div class="modal-action">
                         <button type="button" wire:click="closeTipoVehiculoModal" class="btn btn-ghost">Cancelar</button>

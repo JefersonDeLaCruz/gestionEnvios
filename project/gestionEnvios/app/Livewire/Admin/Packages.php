@@ -8,6 +8,7 @@ use App\Models\Envio;
 use App\Models\Cliente;
 use App\Models\EnvioCliente;
 use App\Models\User;
+use App\Models\EstadoEnvio;
 
 class Packages extends Component
 {
@@ -24,7 +25,16 @@ class Packages extends Component
     public $availableDrivers = [];
     public $selectedDriverId = null;
 
+    // Filters
+    public $search = '';
+    public $status = '';
+    public $statuses = [];
+    public $date = '';
+
     // Sender information
+    public $sender_search = '';
+    public $sender_suggestions = [];
+    public $sender_id = null;
     public $sender_nombre = '';
     public $sender_apellido = '';
     public $sender_direccion = '';
@@ -36,6 +46,9 @@ class Packages extends Component
     public $sender_lng = null;
 
     // Receiver information
+    public $receiver_search = '';
+    public $receiver_suggestions = [];
+    public $receiver_id = null;
     public $receiver_nombre = '';
     public $receiver_apellido = '';
     public $receiver_direccion = '';
@@ -53,6 +66,93 @@ class Packages extends Component
     public $tipo_envio = 'estandar';
     public $fecha_estimada = '';
 
+    public function updatedSearch()
+    {
+        $this->loadPendingShipments();
+    }
+
+    public function updatedStatus()
+    {
+        $this->loadPendingShipments();
+    }
+
+    public function updatedDate()
+    {
+        $this->loadPendingShipments();
+    }
+
+    public function updatedSenderSearch()
+    {
+        if (strlen($this->sender_search) < 2) {
+            $this->sender_suggestions = [];
+            return;
+        }
+
+        $this->sender_suggestions = Cliente::where('nombre', 'like', '%' . $this->sender_search . '%')
+            ->orWhere('apellido', 'like', '%' . $this->sender_search . '%')
+            ->orWhere('telefono', 'like', '%' . $this->sender_search . '%')
+            ->orWhere('email', 'like', '%' . $this->sender_search . '%')
+            ->orWhere('dui', 'like', '%' . $this->sender_search . '%')
+            ->orWhere('nit', 'like', '%' . $this->sender_search . '%')
+            ->take(5)
+            ->get();
+    }
+
+    public function selectSender($id)
+    {
+        $client = Cliente::find($id);
+        if ($client) {
+            $this->sender_id = $client->id;
+            $this->sender_nombre = $client->nombre;
+            $this->sender_apellido = $client->apellido;
+            $this->sender_direccion = $client->direccion;
+            $this->sender_telefono = $client->telefono;
+            $this->sender_email = $client->email;
+            $this->sender_dui = $client->dui;
+            $this->sender_nit = $client->nit;
+            $this->sender_lat = $client->latitud;
+            $this->sender_lng = $client->longitud;
+            $this->sender_search = '';
+            $this->sender_suggestions = [];
+        }
+    }
+
+    public function updatedReceiverSearch()
+    {
+        if (strlen($this->receiver_search) < 2) {
+            $this->receiver_suggestions = [];
+            return;
+        }
+
+        $this->receiver_suggestions = Cliente::where('nombre', 'like', '%' . $this->receiver_search . '%')
+            ->orWhere('apellido', 'like', '%' . $this->receiver_search . '%')
+            ->orWhere('telefono', 'like', '%' . $this->receiver_search . '%')
+            ->orWhere('email', 'like', '%' . $this->receiver_search . '%')
+            ->orWhere('dui', 'like', '%' . $this->receiver_search . '%')
+            ->orWhere('nit', 'like', '%' . $this->receiver_search . '%')
+            ->take(5)
+            ->get();
+    }
+
+    public function selectReceiver($id)
+    {
+        $client = Cliente::find($id);
+        if ($client) {
+            $this->receiver_id = $client->id;
+            $this->receiver_nombre = $client->nombre;
+            $this->receiver_apellido = $client->apellido;
+            $this->receiver_direccion = $client->direccion;
+            $this->receiver_telefono = $client->telefono;
+            $this->receiver_email = $client->email;
+            $this->receiver_dui = $client->dui;
+            $this->receiver_nit = $client->nit;
+            $this->receiver_lat = $client->latitud;
+            $this->receiver_lng = $client->longitud;
+            $this->receiver_search = '';
+            $this->receiver_suggestions = [];
+        }
+    }
+
     public function openModal()
     {
         $this->showModal = true;
@@ -64,6 +164,9 @@ class Packages extends Component
         $this->showModal = false;
         $this->currentStep = 1;
         $this->reset([
+            'sender_id',
+            'sender_search',
+            'sender_suggestions',
             'sender_nombre',
             'sender_apellido',
             'sender_direccion',
@@ -73,6 +176,9 @@ class Packages extends Component
             'sender_nit',
             'sender_lat',
             'sender_lng',
+            'receiver_id',
+            'receiver_search',
+            'receiver_suggestions',
             'receiver_nombre',
             'receiver_apellido',
             'receiver_direccion',
@@ -143,49 +249,60 @@ class Packages extends Component
             'dimensiones' => 'nullable|string|max:255',
             'tipo_envio' => 'required|in:estandar,express,overnight',
             'fecha_estimada' => 'required|date|after_or_equal:today',
-            'receiver_lat' => 'nullable|numeric|between:-90,90',
-            'receiver_lng' => 'nullable|numeric|between:-180,180',
+            'receiver_lat' => 'required|numeric|between:-90,90',
+            'receiver_lng' => 'required|numeric|between:-180,180',
         ]);
 
         // Find or create sender client
-        // If a client with this email exists, reuse it; otherwise create new
-        $sender = Cliente::firstOrCreate(
-            ['email' => $this->sender_email ?: null], // Search by email (or null if empty)
-            [
+        if ($this->sender_id) {
+            $sender = Cliente::find($this->sender_id);
+            $sender->update([
                 'nombre' => $this->sender_nombre,
                 'apellido' => $this->sender_apellido,
                 'direccion' => $this->sender_direccion,
                 'telefono' => $this->sender_telefono,
                 'dui' => $this->sender_dui,
                 'nit' => $this->sender_nit,
-            ]
-        );
-
-        // Update coordinates if they were provided and client already existed
-        if ($this->sender_lat && $this->sender_lng) {
-            $sender->update([
-                // Also update other fields if needed, but for now just coords
-                'direccion' => $this->sender_direccion,
+                'email' => $this->sender_email,
             ]);
+        } else {
+            $sender = Cliente::firstOrCreate(
+                ['email' => $this->sender_email ?: null],
+                [
+                    'nombre' => $this->sender_nombre,
+                    'apellido' => $this->sender_apellido,
+                    'direccion' => $this->sender_direccion,
+                    'telefono' => $this->sender_telefono,
+                    'dui' => $this->sender_dui,
+                    'nit' => $this->sender_nit,
+                ]
+            );
         }
 
         // Find or create receiver client
-        $receiver = Cliente::firstOrCreate(
-            ['email' => $this->receiver_email ?: null],
-            [
+        if ($this->receiver_id) {
+            $receiver = Cliente::find($this->receiver_id);
+            $receiver->update([
                 'nombre' => $this->receiver_nombre,
                 'apellido' => $this->receiver_apellido,
                 'direccion' => $this->receiver_direccion,
                 'telefono' => $this->receiver_telefono,
                 'dui' => $this->receiver_dui,
                 'nit' => $this->receiver_nit,
-            ]
-        );
-
-        if ($this->receiver_lat && $this->receiver_lng) {
-            $receiver->update([
-                'direccion' => $this->receiver_direccion,
+                'email' => $this->receiver_email,
             ]);
+        } else {
+            $receiver = Cliente::firstOrCreate(
+                ['email' => $this->receiver_email ?: null],
+                [
+                    'nombre' => $this->receiver_nombre,
+                    'apellido' => $this->receiver_apellido,
+                    'direccion' => $this->receiver_direccion,
+                    'telefono' => $this->receiver_telefono,
+                    'dui' => $this->receiver_dui,
+                    'nit' => $this->receiver_nit,
+                ]
+            );
         }
 
         // Create package with auto-generated code
@@ -227,15 +344,41 @@ class Packages extends Component
 
     public function mount()
     {
+        $this->statuses = EstadoEnvio::all();
         $this->loadPendingShipments();
     }
 
     public function loadPendingShipments()
     {
-        $this->pendingShipments = Envio::pendientes()
-            ->with(['paquete.envioClientes.cliente', 'estadoEnvio'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Envio::query()
+            ->with(['paquete.envioClientes.cliente', 'estadoEnvio']);
+
+        if ($this->search) {
+            $query->whereHas('paquete', function ($q) {
+                $q->where('codigo', 'like', '%' . $this->search . '%')
+                    ->orWhere('descripcion', 'like', '%' . $this->search . '%')
+                    ->orWhere('peso', 'like', '%' . $this->search . '%')
+                    ->orWhere('dimensiones', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('envioClientes.cliente', function ($qc) {
+                        $qc->where('nombre', 'like', '%' . $this->search . '%')
+                            ->orWhere('apellido', 'like', '%' . $this->search . '%')
+                            ->orWhere('dui', 'like', '%' . $this->search . '%')
+                            ->orWhere('nit', 'like', '%' . $this->search . '%');
+                    });
+            });
+        }
+
+        if ($this->status && $this->status !== 'Todos') {
+            $query->whereHas('estadoEnvio', function ($q) {
+                $q->where('nombre', $this->status);
+            });
+        }
+
+        if ($this->date) {
+            $query->whereDate('created_at', $this->date);
+        }
+
+        $this->pendingShipments = $query->orderBy('created_at', 'desc')->get();
     }
 
     public function openAssignModal($envioId)
