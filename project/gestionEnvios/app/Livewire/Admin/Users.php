@@ -7,6 +7,9 @@ use Livewire\WithPagination;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
+
 
 class Users extends Component
 {
@@ -124,46 +127,93 @@ class Users extends Component
     //funcion para guardar nuevo usuario
     public function save()
     {
+        // Validar con las reglas definidas
         $this->validate();
 
-        if ($this->editMode) {
-            $user = User::findOrFail($this->userId);
-            $user->update([
-                'nombre' => $this->nombre,
-                'apellido' => $this->apellido,
-                'email' => $this->email,
-                'telefono' => $this->telefono,
-                'direccion' => $this->direccion,
-                'estado' => $this->estado,
-            ]);
+        DB::beginTransaction();
 
-            if ($this->password) {
-                $user->update(['password' => Hash::make($this->password)]);
+        try {
+            if ($this->editMode) {
+                $user = User::findOrFail($this->userId);
+
+                $user->update([
+                    'nombre'    => $this->nombre,
+                    'apellido'  => $this->apellido,
+                    'email'     => $this->email,
+                    'telefono'  => $this->telefono,
+                    'direccion' => $this->direccion,
+                    'estado'    => $this->estado,
+                ]);
+
+                if (!empty($this->password)) {
+                    $user->update(['password' => Hash::make($this->password)]);
+                }
+
+                // Sync roles
+                $user->syncRoles([$this->role]);
+
+                session()->flash('message', 'Usuario actualizado exitosamente.');
+            } else {
+                $user = User::create([
+                    'nombre'    => $this->nombre,
+                    'apellido'  => $this->apellido,
+                    'email'     => $this->email,
+                    'telefono'  => $this->telefono,
+                    'direccion' => $this->direccion,
+                    'password'  => Hash::make($this->password),
+                    'estado'    => $this->estado,
+                ]);
+
+                $user->assignRole($this->role);
+
+                session()->flash('message', 'Usuario creado exitosamente.');
             }
 
-            // Sync the user's role
-            $user->syncRoles([$this->role]);
+            DB::commit();
 
-            session()->flash('message', 'Usuario actualizado exitosamente.');
-        } else {
-            $user = User::create([
-                'nombre' => $this->nombre,
-                'apellido' => $this->apellido,
-                'email' => $this->email,
-                'telefono' => $this->telefono,
-                'direccion' => $this->direccion,
-                'password' => Hash::make($this->password),
-                'estado' => $this->estado,
-            ]);
+            $this->closeModal();
+        } catch (QueryException $e) {
+            DB::rollBack();
 
-            // Assign the selected role
-            $user->assignRole($this->role);
+            // Detectar error de duplicado (MySQL 1062). Si usas otro motor, el código cambia.
+            $errorCode = $e->errorInfo[1] ?? null;
 
-            session()->flash('message', 'Usuario creado exitosamente.');
+            if ($errorCode == 1062) {
+                // El mensaje suele traer la columna duplicada, intentamos extraerla
+                $message = $e->getMessage(); // ejemplo: "Duplicate entry 'foo@bar.com' for key 'users_email_unique'"
+                $column = null;
+
+                if (preg_match("/for key '(.+)'/", $message, $matches)) {
+                    $keyName = $matches[1]; // ej: users_email_unique
+                    // intentar deducir columna a partir del nombre de la key
+                    if (preg_match("/email/", $keyName)) {
+                        $column = 'email';
+                    } elseif (preg_match("/telefono|phone/", $keyName)) {
+                        $column = 'telefono';
+                    }
+                }
+
+                // Mensajes amigables dependiendo de la columna detectada
+                if ($column) {
+                    $this->addError($column, 'Ya existe un registro con ese valor.');
+                    session()->flash('error', 'Ya existe un usuario con ese ' . $column . '.');
+                } else {
+                    // Mensaje genérico si no pudimos extraer la columna
+                    session()->flash('error', 'Ya existe un usuario con alguno de los datos ingresados.');
+                }
+            } else {
+                // Otros errores de base de datos: registrar opcionalmente y mostrar mensaje genérico
+                // logger()->error($e->getMessage());
+                session()->flash('error', 'Ocurrió un error al guardar el usuario. Intenta de nuevo.');
+            }
+        } catch (\Exception $e) {
+            // Cualquier otra excepción inesperada
+            DB::rollBack();
+            // logger()->error($e->getMessage());
+            session()->flash('error', 'Ocurrió un error inesperado. Contacta al administrador.');
         }
-
-        $this->closeModal();
     }
+
 
     public function toggleStatus($userId)
     {

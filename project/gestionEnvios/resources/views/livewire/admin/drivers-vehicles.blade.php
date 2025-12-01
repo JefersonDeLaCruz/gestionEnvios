@@ -343,6 +343,7 @@
                             @foreach($tiposVehiculo as $tipo)
                                 <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
                             @endforeach
+                            
                         </select>
                         <label for="vehicle_tipo_vehiculo_id"
                             class="absolute left-4 top-2 text-xs text-base-content/60 bg-base-100 px-1">
