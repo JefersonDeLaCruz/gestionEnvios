@@ -18,10 +18,10 @@ class PaqueteFactory extends Factory
     {
         return [
             'codigo' => fake()->unique()->numberBetween(100000000, 999999999),
+            'descripcion' => fake()->optional()->sentence(), // Agregar descripcion ya que ahora existe
             'peso' => fake()->numberBetween(1, 100),
-            'dimensiones' => fake()->numberBetween(1, 100),
-            'tipo_envio' => fake()->randomElement(['rapido', 'normal']),
-
+            'dimensiones' => fake()->numberBetween(1, 100) . 'x' . fake()->numberBetween(1, 100) . 'x' . fake()->numberBetween(1, 100), // Ahora es string
+            'tipo_envio' => fake()->randomElement(['estandar', 'express', 'overnight']), // ✅ Valores actualizados
         ];
     }
 }
