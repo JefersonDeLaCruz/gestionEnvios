@@ -32,21 +32,21 @@
 
                 </div>
 
-                <!-- Package Status Section (tu component blade) -->
-                <x-package-status>
+                <!-- Package Status Section -->
+                <div class="w-full max-w-md mx-auto lg:mx-0 px-4 sm:px-0">
                     <div class="text-center lg:text-left">
                         <h2 class="text-xl sm:text-2xl lg:text-3xl font-semibold mb-4">
                             Estado del Paquete
                         </h2>
                         <p class="text-sm sm:text-base opacity-70">
-                            Aqui irá lo del estado del paquete, el cual será un componente Livewire
+                            Aquí aparecerá el estado del paquete una vez ingreses un código.
                         </p>
                     </div>
 
                     <div class="mt-4">
                         @livewire('cliente.estado-envio')
                     </div>
-                </x-package-status>
+                </div>
             </div>
         </div>
     </div>
