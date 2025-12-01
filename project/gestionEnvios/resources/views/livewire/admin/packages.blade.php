@@ -1,4 +1,16 @@
-<div class="p-6">
+            <div class="p-6">
+    @push('styles')
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+        <style>
+            .leaflet-map {
+                height: 300px;
+                width: 100%;
+                border-radius: 0.5rem;
+                z-index: 0;
+            }
+        </style>
+    @endpush
     <!-- Success Message -->
     @if (session()->has('message'))
         <div class="alert alert-success mb-6">
@@ -155,7 +167,8 @@
                 <form wire:submit.prevent="save">
                     <!-- Step 1: Sender Information -->
                     @if($currentStep === 1)
-                        <div class="space-y-6">
+                        <div class="space-y-6" x-data="locationPicker(@entangle('sender_lat'), @entangle('sender_lng'))"
+                            x-init="initMap()">
                             <h3 class="text-xl font-semibold text-base-content mb-4">Información del Emisor</h3>
 
                             <!-- Nombre -->
@@ -195,6 +208,18 @@
                                 </label>
                                 @error('sender_direccion') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                 @enderror
+                            </div>
+
+                            <!-- Mapa -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">Ubicación en Mapa</span>
+                                    <span class="label-text-alt text-base-content/60"
+                                        x-text="lat && lng ? 'Ubicación seleccionada' : 'Seleccione ubicación'"></span>
+                                </label>
+                                <div id="sender-map" class="leaflet-map border border-base-300"></div>
+                                <input type="hidden" wire:model="sender_lat">
+                                <input type="hidden" wire:model="sender_lng">
                             </div>
 
                             <!-- Teléfono -->
@@ -253,7 +278,8 @@
 
                     <!-- Step 2: Receiver Information -->
                     @if($currentStep === 2)
-                        <div class="space-y-6">
+                        <div class="space-y-6" x-data="locationPicker(@entangle('receiver_lat'), @entangle('receiver_lng'))"
+                            x-init="initMap()">
                             <h3 class="text-xl font-semibold text-base-content mb-4">Información del Receptor</h3>
 
                             <!-- Nombre -->
@@ -293,6 +319,18 @@
                                 </label>
                                 @error('receiver_direccion') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                 @enderror
+                            </div>
+
+                            <!-- Mapa -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">Ubicación en Mapa</span>
+                                    <span class="label-text-alt text-base-content/60"
+                                        x-text="lat && lng ? 'Ubicación seleccionada' : 'Seleccione ubicación'"></span>
+                                </label>
+                                <div id="receiver-map" class="leaflet-map border border-base-300"></div>
+                                <input type="hidden" wire:model="receiver_lat">
+                                <input type="hidden" wire:model="receiver_lng">
                             </div>
 
                             <!-- Teléfono -->
@@ -552,4 +590,58 @@
             </div>
         </div>
     @endif
+
+    @push('scripts')
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('locationPicker', (latModel, lngModel) => ({
+                    lat: latModel,
+                    lng: lngModel,
+                    map: null,
+                    marker: null,
+
+                    initMap() {
+                        // Wait for DOM to be ready and modal transition
+                        setTimeout(() => {
+                            const mapId = this.$el.querySelector('.leaflet-map').id;
+
+                            // Default to El Salvador coordinates or current selection
+                            const initialLat = this.lat || 13.6929;
+                            const initialLng = this.lng || -89.2182;
+                            const zoom = this.lat && this.lng ? 15 : 13;
+
+                            this.map = L.map(mapId).setView([initialLat, initialLng], zoom);
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            }).addTo(this.map);
+
+                            if (this.lat && this.lng) {
+                                this.marker = L.marker([this.lat, this.lng]).addTo(this.map);
+                            }
+
+                            this.map.on('click', (e) => {
+                                const { lat, lng } = e.latlng;
+                                this.lat = lat;
+                                this.lng = lng;
+
+                                if (this.marker) {
+                                    this.marker.setLatLng([lat, lng]);
+                                } else {
+                                    this.marker = L.marker([lat, lng]).addTo(this.map);
+                                }
+                            });
+
+                            // Invalidate size to handle modal rendering issues
+                            setTimeout(() => {
+                                this.map.invalidateSize();
+                            }, 100);
+                        }, 100);
+                    }
+                }));
+            });
+        </script>
+    @endpush
 </div>

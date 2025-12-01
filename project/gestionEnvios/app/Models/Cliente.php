@@ -18,5 +18,7 @@ class Cliente extends Model
         'email',
         'dui',
         'nit',
+        'latitud',
+        'longitud',
     ];
 }

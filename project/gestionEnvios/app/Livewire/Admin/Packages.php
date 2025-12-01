@@ -32,6 +32,8 @@ class Packages extends Component
     public $sender_email = '';
     public $sender_dui = '';
     public $sender_nit = '';
+    public $sender_lat = null;
+    public $sender_lng = null;
 
     // Receiver information
     public $receiver_nombre = '';
@@ -41,6 +43,8 @@ class Packages extends Component
     public $receiver_email = '';
     public $receiver_dui = '';
     public $receiver_nit = '';
+    public $receiver_lat = null;
+    public $receiver_lng = null;
 
     // Package information
     public $descripcion = '';
@@ -67,6 +71,8 @@ class Packages extends Component
             'sender_email',
             'sender_dui',
             'sender_nit',
+            'sender_lat',
+            'sender_lng',
             'receiver_nombre',
             'receiver_apellido',
             'receiver_direccion',
@@ -74,6 +80,8 @@ class Packages extends Component
             'receiver_email',
             'receiver_dui',
             'receiver_nit',
+            'receiver_lat',
+            'receiver_lng',
             'descripcion',
             'peso',
             'dimensiones',
@@ -109,6 +117,8 @@ class Packages extends Component
                 'sender_email' => 'nullable|email|max:255',
                 'sender_dui' => 'nullable|string|max:20',
                 'sender_nit' => 'nullable|string|max:20',
+                'sender_lat' => 'nullable|numeric|between:-90,90',
+                'sender_lng' => 'nullable|numeric|between:-180,180',
             ]);
         } elseif ($this->currentStep == 2) {
             $this->validate([
@@ -119,6 +129,8 @@ class Packages extends Component
                 'receiver_email' => 'nullable|email|max:255',
                 'receiver_dui' => 'nullable|string|max:20',
                 'receiver_nit' => 'nullable|string|max:20',
+                'receiver_lat' => 'nullable|numeric|between:-90,90',
+                'receiver_lng' => 'nullable|numeric|between:-180,180',
             ]);
         }
     }
@@ -146,8 +158,20 @@ class Packages extends Component
                 'telefono' => $this->sender_telefono,
                 'dui' => $this->sender_dui,
                 'nit' => $this->sender_nit,
+                'latitud' => $this->sender_lat,
+                'longitud' => $this->sender_lng,
             ]
         );
+
+        // Update coordinates if they were provided and client already existed
+        if ($this->sender_lat && $this->sender_lng) {
+            $sender->update([
+                'latitud' => $this->sender_lat,
+                'longitud' => $this->sender_lng,
+                // Also update other fields if needed, but for now just coords
+                'direccion' => $this->sender_direccion,
+            ]);
+        }
 
         // Find or create receiver client
         $receiver = Cliente::firstOrCreate(
@@ -159,8 +183,18 @@ class Packages extends Component
                 'telefono' => $this->receiver_telefono,
                 'dui' => $this->receiver_dui,
                 'nit' => $this->receiver_nit,
+                'latitud' => $this->receiver_lat,
+                'longitud' => $this->receiver_lng,
             ]
         );
+
+        if ($this->receiver_lat && $this->receiver_lng) {
+            $receiver->update([
+                'latitud' => $this->receiver_lat,
+                'longitud' => $this->receiver_lng,
+                'direccion' => $this->receiver_direccion,
+            ]);
+        }
 
         // Create package with auto-generated code
         $paquete = Paquete::create([

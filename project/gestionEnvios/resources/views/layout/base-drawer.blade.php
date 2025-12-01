@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/theme-change@2.0.2/index.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    @stack('styles')
 </head>
 
 <body>
@@ -17,7 +18,7 @@
         <div class="drawer-content flex flex-col">
 
             @persist('navbar')
-                @include('layout.navbar')
+            @include('layout.navbar')
             @endpersist
             <main>
                 {{ $slot }}
@@ -50,6 +51,7 @@
     </script>
 
     @livewireScripts
+    @stack('scripts')
 </body>
 
 </html>
