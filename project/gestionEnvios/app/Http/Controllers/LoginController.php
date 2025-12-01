@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;        
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Redirect;    
+use Illuminate\Support\Facades\Redirect;
 
 class LoginController extends Controller
 {
@@ -19,39 +19,41 @@ class LoginController extends Controller
         return view('login');
     }
 
-    public function login(Request $request) // iniciar sesión
+    public function login(Request $request)
     {
-        // dd($request->all());
-        $credentials = $request->only('email', 'password');
-
         $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
+        $email = $request->input('email');
+        $password = $request->input('password');
 
+        $user = User::where('email', $email)->first();
 
-        if (Auth::attempt($credentials)) {
-            Session::put('user', $credentials);
-            
-            // Obtener el usuario autenticado
-            /** @var \App\Models\User $user */
-            $user = Auth::user();
-
-            // Redirigir según el rol del usuario
-            if ($user->hasRole('admin')) {
-                return redirect()->route('admin');
-            } elseif ($user->hasRole('repartidor')) {
-                return redirect()->route('repartidor');
-            }
-
-            // Si no tiene ningún rol específico, redirigir a home
-            return redirect()->route('home');
+        if (!$user) {
+            // Mensaje genérico para evitar enumeración de usuarios
+            return back()->withErrors(['email' => 'Credenciales inválidas.']);
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ]);
+        // Asumiendo estado 1 = activo
+        if ($user->estado != 1) {
+            return back()->withErrors(['email' => 'Tu cuenta está desactivada. Contacta al administrador.']);
+        }
+
+        // Verificar contraseña (opcional antes de Auth::attempt)
+        if (!Hash::check($password, $user->password)) {
+            return back()->withErrors(['email' => 'Credenciales inválidas.']);
+        }
+
+        // Si todo OK, loguear
+        Auth::login($user);
+        Session::put('user', $user->only('id', 'email'));
+
+        if ($user->hasRole('admin')) return redirect()->route('admin');
+        if ($user->hasRole('repartidor')) return redirect()->route('repartidor');
+
+        return redirect()->route('home');
     }
 
     public function logout(Request $request) // cerrar sesión
