@@ -16,6 +16,8 @@ class Paquete extends Model
         'peso',
         'dimensiones',
         'tipo_envio',
+        'latitud',
+        'longitud',
     ];
     public function envios()
     {

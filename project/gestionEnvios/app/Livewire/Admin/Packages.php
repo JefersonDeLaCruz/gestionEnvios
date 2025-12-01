@@ -129,8 +129,6 @@ class Packages extends Component
                 'receiver_email' => 'nullable|email|max:255',
                 'receiver_dui' => 'nullable|string|max:20',
                 'receiver_nit' => 'nullable|string|max:20',
-                'receiver_lat' => 'nullable|numeric|between:-90,90',
-                'receiver_lng' => 'nullable|numeric|between:-180,180',
             ]);
         }
     }
@@ -145,6 +143,8 @@ class Packages extends Component
             'dimensiones' => 'nullable|string|max:255',
             'tipo_envio' => 'required|in:estandar,express,overnight',
             'fecha_estimada' => 'required|date|after_or_equal:today',
+            'receiver_lat' => 'nullable|numeric|between:-90,90',
+            'receiver_lng' => 'nullable|numeric|between:-180,180',
         ]);
 
         // Find or create sender client
@@ -158,16 +158,12 @@ class Packages extends Component
                 'telefono' => $this->sender_telefono,
                 'dui' => $this->sender_dui,
                 'nit' => $this->sender_nit,
-                'latitud' => $this->sender_lat,
-                'longitud' => $this->sender_lng,
             ]
         );
 
         // Update coordinates if they were provided and client already existed
         if ($this->sender_lat && $this->sender_lng) {
             $sender->update([
-                'latitud' => $this->sender_lat,
-                'longitud' => $this->sender_lng,
                 // Also update other fields if needed, but for now just coords
                 'direccion' => $this->sender_direccion,
             ]);
@@ -183,15 +179,11 @@ class Packages extends Component
                 'telefono' => $this->receiver_telefono,
                 'dui' => $this->receiver_dui,
                 'nit' => $this->receiver_nit,
-                'latitud' => $this->receiver_lat,
-                'longitud' => $this->receiver_lng,
             ]
         );
 
         if ($this->receiver_lat && $this->receiver_lng) {
             $receiver->update([
-                'latitud' => $this->receiver_lat,
-                'longitud' => $this->receiver_lng,
                 'direccion' => $this->receiver_direccion,
             ]);
         }
@@ -203,6 +195,8 @@ class Packages extends Component
             'peso' => $this->peso,
             'dimensiones' => $this->dimensiones,
             'tipo_envio' => $this->tipo_envio,
+            'latitud' => $this->receiver_lat,
+            'longitud' => $this->receiver_lng,
         ]);
 
         // Link sender to package

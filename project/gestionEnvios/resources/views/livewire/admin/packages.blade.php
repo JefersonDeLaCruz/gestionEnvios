@@ -1,4 +1,4 @@
-            <div class="p-6">
+<div class="p-6">
     @push('styles')
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -278,8 +278,7 @@
 
                     <!-- Step 2: Receiver Information -->
                     @if($currentStep === 2)
-                        <div class="space-y-6" x-data="locationPicker(@entangle('receiver_lat'), @entangle('receiver_lng'))"
-                            x-init="initMap()">
+                        <div class="space-y-6">
                             <h3 class="text-xl font-semibold text-base-content mb-4">Información del Receptor</h3>
 
                             <!-- Nombre -->
@@ -319,18 +318,6 @@
                                 </label>
                                 @error('receiver_direccion') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                 @enderror
-                            </div>
-
-                            <!-- Mapa -->
-                            <div class="form-control">
-                                <label class="label">
-                                    <span class="label-text">Ubicación en Mapa</span>
-                                    <span class="label-text-alt text-base-content/60"
-                                        x-text="lat && lng ? 'Ubicación seleccionada' : 'Seleccione ubicación'"></span>
-                                </label>
-                                <div id="receiver-map" class="leaflet-map border border-base-300"></div>
-                                <input type="hidden" wire:model="receiver_lat">
-                                <input type="hidden" wire:model="receiver_lng">
                             </div>
 
                             <!-- Teléfono -->
@@ -389,7 +376,8 @@
 
                     <!-- Step 3: Package Information -->
                     @if($currentStep === 3)
-                        <div class="space-y-6">
+                        <div class="space-y-6" x-data="locationPicker(@entangle('receiver_lat'), @entangle('receiver_lng'))"
+                            x-init="initMap()">
                             <h3 class="text-xl font-semibold text-base-content mb-4">Información del Paquete</h3>
 
                             <!-- Descripción -->
@@ -457,6 +445,37 @@
                                 </label>
                                 @error('fecha_estimada') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                 @enderror
+                            </div>
+
+                            <!-- Coordenadas (Latitud/Longitud) -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">Ubicación de Entrega</span>
+                                    <span class="label-text-alt text-base-content/60"
+                                        x-text="lat && lng ? 'Ubicación seleccionada' : 'Seleccione ubicación en el mapa'"></span>
+                                </label>
+                                <div id="receiver-map" class="leaflet-map border border-base-300 mb-4"></div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="relative group">
+                                        <input type="text" wire:model="receiver_lat" id="receiver_lat_input"
+                                            class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer"
+                                            placeholder=" " readonly />
+                                        <label for="receiver_lat_input"
+                                            class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary left-1">
+                                            Latitud
+                                        </label>
+                                    </div>
+                                    <div class="relative group">
+                                        <input type="text" wire:model="receiver_lng" id="receiver_lng_input"
+                                            class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer"
+                                            placeholder=" " readonly />
+                                        <label for="receiver_lng_input"
+                                            class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary left-1">
+                                            Longitud
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     @endif
