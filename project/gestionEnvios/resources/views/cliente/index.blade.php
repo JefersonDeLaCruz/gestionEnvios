@@ -16,27 +16,24 @@
                     <p class="text-sm sm:text-base lg:text-lg py-4 sm:py-6 opacity-80">
                         Ingresa tu código de seguimiento para ver el estado de tu envío.
                     </p>
-                    
-                    <form action="#" method="POST" class="flex flex-col gap-3 sm:gap-4 mt-4 sm:mt-6">
+
+                    {{-- Form que emite evento a Livewire --}}
+                    <form
+                        onsubmit="event.preventDefault(); Livewire.dispatch('buscarCodigo', { codigo: document.getElementById('trackingCodeLeft').value })">
                         @csrf
                         <div class="form-control w-full">
-                            <input 
-                                type="text" 
-                                placeholder="Ej: PKG-12345678" 
-                                class="input input-bordered w-full border-gray-700 focus:border-secondary focus:outline-none text-sm sm:text-base" 
-                            />
+                            <input id="trackingCodeLeft" type="text" placeholder="Ej: PKG-12345678"
+                                class="input input-bordered w-full ..." />
                         </div>
-                        <button 
-                            type="submit" 
-                            class="btn btn-secondary border-none w-full text-sm sm:text-base"
-                        >
-                            Rastrear
-                        </button>
+
+                        <button type="submit" class="btn btn-secondary ... mt-3">Rastrear</button>
                     </form>
+
+
                 </div>
 
-                <!-- Package Status Section -->
-                <div class="w-full max-w-md mx-auto lg:mx-0 px-4 sm:px-0 mt-8 lg:mt-0">
+                <!-- Package Status Section (tu component blade) -->
+                <x-package-status>
                     <div class="text-center lg:text-left">
                         <h2 class="text-xl sm:text-2xl lg:text-3xl font-semibold mb-4">
                             Estado del Paquete
@@ -45,10 +42,15 @@
                             Aqui irá lo del estado del paquete, el cual será un componente Livewire
                         </p>
                     </div>
-                </div>
+
+                    <div class="mt-4">
+                        @livewire('cliente.estado-envio')
+                    </div>
+                </x-package-status>
             </div>
         </div>
     </div>
-@endsection 
+@endsection
 @section('footer')
     @include('layout.footer')
+@endsection
