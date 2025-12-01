@@ -55,15 +55,16 @@ class DriversVehicles extends Component
     }
 
     public function loadDrivers()
-    {
-        $this->drivers = User::role('repartidor')
-            ->with([
-                'vehiculos' => function ($query) {
-                    $query->where('motorista_vehiculo.activo', true);
-                }
-            ])
-            ->get();
-    }
+{
+    $this->drivers = User::role('repartidor')
+        ->where('estado', true) // Filtrar solo usuarios activos
+        ->with([
+            'vehiculos' => function ($query) {
+                $query->where('motorista_vehiculo.activo', true);
+            }
+        ])
+        ->get();
+}
 
     public function loadVehicles()
     {
