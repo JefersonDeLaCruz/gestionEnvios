@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\TipoVehiculo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,6 +18,8 @@ class VehiculoFactory extends Factory
     public function definition(): array
     {
         return [
+            // Seleccionar un tipo de vehículo existente aleatoriamente
+            'tipo_vehiculo_id' => TipoVehiculo::inRandomOrder()->first()?->id ?? TipoVehiculo::factory(),
             'numero_placas' => fake()->unique()->regexify('P [0-9]{3}-[0-9]{3}'),
             'marca' => fake()->word(),
             'modelo' => fake()->word(),

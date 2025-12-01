@@ -13,16 +13,6 @@ class TipoVehiculo extends Model
     
     protected $fillable = [
         'nombre',
-        'capacidad_max_kg',
-        'capacidad_max_m3',
-        'descripcion',
-        'activo',
-    ];
-
-    protected $casts = [
-        'capacidad_max_kg' => 'decimal:2',
-        'capacidad_max_m3' => 'decimal:2',
-        'activo' => 'boolean',
     ];
 
     public function vehiculos()

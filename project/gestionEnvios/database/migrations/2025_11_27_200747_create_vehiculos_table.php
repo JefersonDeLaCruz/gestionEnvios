@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('vehiculos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('tipo_vehiculo_id')->nullable()->constrained('tipo_vehiculos')->nullOnDelete();
+   
             $table->string('numero_placas')->unique();
             $table->string('marca');
             $table->string('modelo');

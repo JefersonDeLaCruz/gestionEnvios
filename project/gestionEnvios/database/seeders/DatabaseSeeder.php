@@ -19,9 +19,11 @@ class DatabaseSeeder extends Seeder
         $this->call(ClienteSeeder::class);
         $this->call(PaqueteSeeder::class);
         $this->call(EnvioClienteSeeder::class);
+        $this->call(TipoVehiculoSeeder::class);
         $this->call(VehiculoSeeder::class);
         $this->call(EstadoEnvioSeeder::class);
         $this->call(EnvioSeeder::class);
         $this->call(HistorialEnvioSeeder::class);
+        
     }
 }

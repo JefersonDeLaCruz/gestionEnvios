@@ -29,6 +29,7 @@ class RoleSeeder extends Seeder
                 'apellido'   => 'Sistema',
                 'telefono'   => '12345678',
                 'direccion'  => 'Oficina Central',
+                'estado'     => true,
                 'password'   => Hash::make('admin123'),
             ]
         );
