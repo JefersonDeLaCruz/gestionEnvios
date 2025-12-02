@@ -17,13 +17,12 @@ class EnvioFactory extends Factory
     public function definition(): array
     {
         return [
-            'paquete_id' => fake()->numberBetween(1, 10),
-            'vehiculo_id' => fake()->numberBetween(1, 10),
-            'motorista_id' => fake()->numberBetween(1),
-            'estado_envio_id' => fake()->numberBetween(1, 3),
-            'fecha_estimada' => fake()->date(),
-            'costo' => fake()->numberBetween(1, 500),
-
+            'paquete_id' => \App\Models\Paquete::inRandomOrder()->first()->id ?? \App\Models\Paquete::factory(),
+            'vehiculo_id' => \App\Models\Vehiculo::inRandomOrder()->first()->id ?? \App\Models\Vehiculo::factory(),
+            'motorista_id' => \App\Models\User::role('repartidor')->inRandomOrder()->first()->id ?? \App\Models\User::factory(),
+            'estado_envio_id' => \App\Models\EstadoEnvio::inRandomOrder()->first()->id ?? \App\Models\EstadoEnvio::factory(),
+            'fecha_estimada' => fake()->dateTimeBetween('now', '+1 week'),
+            'costo' => fake()->randomFloat(2, 10, 500),
         ];
     }
 }

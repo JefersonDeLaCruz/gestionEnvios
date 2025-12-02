@@ -31,6 +31,10 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        // Clear dimensiones data that can't be converted to decimal
+        \Illuminate\Support\Facades\DB::table('paquetes')
+            ->update(['dimensiones' => null]);
+
         Schema::table('paquetes', function (Blueprint $table) {
             $table->dropColumn('descripcion');
             $table->decimal('dimensiones', 8, 2)->change();

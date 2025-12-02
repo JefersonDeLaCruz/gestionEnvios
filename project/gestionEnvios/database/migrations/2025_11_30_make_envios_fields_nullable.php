@@ -26,6 +26,13 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        // Remove records that would violate the not null constraint
+        \Illuminate\Support\Facades\DB::table('envios')
+            ->whereNull('vehiculo_id')
+            ->orWhereNull('motorista_id')
+            ->orWhereNull('costo')
+            ->delete();
+
         Schema::table('envios', function (Blueprint $table) {
             $table->foreignId('vehiculo_id')->nullable(false)->change();
             $table->foreignId('motorista_id')->nullable(false)->change();

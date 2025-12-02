@@ -34,8 +34,7 @@ class RepartidorSeeder extends Seeder
 
         // Get or create a vehicle type
         $tipoVehiculo = TipoVehiculo::firstOrCreate(
-            ['nombre' => 'Camioneta'],
-            ['descripcion' => 'Camioneta de carga mediana']
+            ['nombre' => 'Camioneta']
         );
 
         // Create a vehicle
