@@ -47,6 +47,7 @@ class RoleSeeder extends Seeder
                 'apellido'   => 'Repartidor',
                 'telefono'   => '87654321',
                 'direccion'  => 'Zona 1',
+                'estado'     => true,
                 'password'   => Hash::make('repartidor123'),
             ]
         );

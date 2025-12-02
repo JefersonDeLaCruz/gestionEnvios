@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RoleSeeder::class);
         $this->call(ClienteSeeder::class);
+        $this->call(TipoEnvioSeeder::class);
         $this->call(PaqueteSeeder::class);
         $this->call(EnvioClienteSeeder::class);
         $this->call(TipoVehiculoSeeder::class);
@@ -24,6 +25,5 @@ class DatabaseSeeder extends Seeder
         $this->call(EstadoEnvioSeeder::class);
         $this->call(EnvioSeeder::class);
         $this->call(HistorialEnvioSeeder::class);
-        
     }
 }

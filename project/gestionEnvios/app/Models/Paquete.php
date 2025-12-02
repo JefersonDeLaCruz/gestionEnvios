@@ -15,10 +15,11 @@ class Paquete extends Model
         'descripcion',
         'peso',
         'dimensiones',
-        'tipo_envio',
+        'tipo_envio_id',
         'latitud',
         'longitud',
     ];
+
     public function envios()
     {
         return $this->hasMany(Envio::class);
@@ -27,5 +28,10 @@ class Paquete extends Model
     public function envioClientes()
     {
         return $this->hasMany(EnvioCliente::class);
+    }
+
+    public function tipoEnvio()
+    {
+        return $this->belongsTo(TipoEnvio::class, 'tipo_envio_id');
     }
 }

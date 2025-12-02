@@ -37,6 +37,7 @@
                         <tr>
                             <th>Código</th>
                             <th>Remitente / Destinatario</th>
+                            <th>Prioridad</th>
                             <th>Estado</th>
                             <th>Fecha Estimada</th>
                             <th>Repartidor</th>
@@ -59,6 +60,9 @@
                                                             <span class="text-base-content/70">Para:
                                                                 {{ $destinatario ? $destinatario->nombre . ' ' . $destinatario->apellido : 'N/A' }}</span>
                                                         </div>
+                                                    </td>
+                                                    <td>
+                                                        {{ $shipment->paquete->tipoEnvio->nombre }}
                                                     </td>
                                                     <td>
                                                         <div class="badge {{ match ($shipment->estadoEnvio->slug ?? '') {
@@ -179,7 +183,7 @@
                                         {{ $selectedShipment->paquete->dimensiones ?? 'N/A' }}</p>
                                 </div>
                                 <p><span class="font-semibold">Tipo de Envío:</span> <span
-                                        class="badge badge-outline capitalize">{{ $selectedShipment->paquete->tipo_envio }}</span>
+                                        class="badge badge-outline capitalize">{{ $selectedShipment->paquete->tipoEnvio->nombre }}</span>
                                 </p>
                                 <p><span class="font-semibold">Costo:</span>
                                     ${{ number_format($selectedShipment->costo, 2) }}</p>

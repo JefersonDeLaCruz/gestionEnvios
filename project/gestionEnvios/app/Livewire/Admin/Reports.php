@@ -65,7 +65,7 @@ class Reports extends Component
 
         $totalDeliveries = $query->count();
         $totalRevenue = $query->sum('costo');
-        $completedDeliveries = (clone $query)->whereHas('estadoEnvio', function($q) {
+        $completedDeliveries = (clone $query)->whereHas('estadoEnvio', function ($q) {
             $q->where('es_final', true);
         })->count();
         $activeDeliveries = $totalDeliveries - $completedDeliveries;
@@ -84,17 +84,17 @@ class Reports extends Component
     public function getDriverPerformance()
     {
         $drivers = User::role('repartidor')
-            ->withCount(['envios as total_deliveries' => function($q) {
+            ->withCount(['envios as total_deliveries' => function ($q) {
                 $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
             }])
-            ->withSum(['envios as total_revenue' => function($q) {
+            ->withSum(['envios as total_revenue' => function ($q) {
                 $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
             }], 'costo')
-            ->withCount(['envios as completed_deliveries' => function($q) {
+            ->withCount(['envios as completed_deliveries' => function ($q) {
                 $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
-                  ->whereHas('estadoEnvio', function($sq) {
-                      $sq->where('es_final', true);
-                  });
+                    ->whereHas('estadoEnvio', function ($sq) {
+                        $sq->where('es_final', true);
+                    });
             }])
             ->having('total_deliveries', '>', 0)
             ->orderByDesc('total_deliveries')
@@ -131,13 +131,55 @@ class Reports extends Component
         return $distribution;
     }
 
+    public $selectedEnvioId = null;
+    public $showHistoryModal = false;
+
+    public function viewHistory($envioId)
+    {
+        $this->selectedEnvioId = $envioId;
+        $this->showHistoryModal = true;
+    }
+
+    public function closeHistoryModal()
+    {
+        $this->showHistoryModal = false;
+        $this->selectedEnvioId = null;
+    }
+
+    public $selectedImageUrl = null;
+    public $showImageModal = false;
+
+    public function viewImage($url)
+    {
+        $this->selectedImageUrl = $url;
+        $this->showImageModal = true;
+    }
+
+    public function closeImageModal()
+    {
+        $this->showImageModal = false;
+        $this->selectedImageUrl = null;
+    }
+
+    public function getHistoryProperty()
+    {
+        if (!$this->selectedEnvioId) {
+            return collect();
+        }
+
+        return \App\Models\HistorialEnvio::where('envio_id', $this->selectedEnvioId)
+            ->with('estadoEnvio')
+            ->latest()
+            ->get();
+    }
+
     public function render()
     {
         $generalStats = $this->getGeneralStats();
         $driverPerformance = $this->getDriverPerformance();
         $deliveries = $this->getDeliveries();
         $statusDistribution = $this->getStatusDistribution();
-        
+
         $drivers = User::role('repartidor')->get();
         $statuses = EstadoEnvio::all();
 
@@ -148,6 +190,7 @@ class Reports extends Component
             'statusDistribution' => $statusDistribution,
             'drivers' => $drivers,
             'statuses' => $statuses,
+            'history' => $this->history,
         ])->layout('layout.base-drawer');
     }
 }

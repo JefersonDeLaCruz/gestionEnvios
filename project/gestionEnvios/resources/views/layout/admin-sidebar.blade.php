@@ -92,7 +92,7 @@
                 </a>
             </li>
 
-            <li>
+           <!--  <li>
                 <a href="{{ route('admin.fleet') }}" wire:navigate
                     class="flex is-drawer-close:tooltip is-drawer-close:tooltip-right {{ request()->routeIs('admin.fleet') ? 'active' : '' }}"
                     data-tip="Flota">
@@ -106,7 +106,7 @@
                     </svg>
                     <span class="font-medium">Flota y Rutas</span>
                 </a>
-            </li>
+            </li> -->
 
             <li>
                 <a href="{{ route('admin.reports') }}" wire:navigate

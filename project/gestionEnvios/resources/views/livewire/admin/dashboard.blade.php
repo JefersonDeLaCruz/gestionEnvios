@@ -15,8 +15,8 @@
                     </svg>
                 </div>
                 <div class="stat-title">Total Paquetes</div>
-                <div class="stat-value text-primary">125</div>
-                <div class="stat-desc">↗︎ 12% más que el mes pasado</div>
+                <div class="stat-value text-primary">{{ $totalPaquetes }}</div>
+                <div class="stat-desc">Registrados en el sistema</div>
             </div>
         </div>
 
@@ -29,8 +29,8 @@
                     </svg>
                 </div>
                 <div class="stat-title">Usuarios Activos</div>
-                <div class="stat-value text-secondary">48</div>
-                <div class="stat-desc">↗︎ 8 nuevos esta semana</div>
+                <div class="stat-value text-secondary">{{ $usuariosActivos }}</div>
+                <div class="stat-desc">Usuarios registrados</div>
             </div>
         </div>
 
@@ -44,8 +44,8 @@
                     </svg>
                 </div>
                 <div class="stat-title">Vehículos</div>
-                <div class="stat-value text-accent">12</div>
-                <div class="stat-desc">10 en ruta actualmente</div>
+                <div class="stat-value text-accent">{{ $vehiculos }}</div>
+                <div class="stat-desc">Flota total</div>
             </div>
         </div>
 
@@ -57,8 +57,8 @@
                     </svg>
                 </div>
                 <div class="stat-title">Ingresos Hoy</div>
-                <div class="stat-value text-success">$2,450</div>
-                <div class="stat-desc">↗︎ 15% vs ayer</div>
+                <div class="stat-value text-success">${{ number_format($ingresosHoy, 2) }}</div>
+                <div class="stat-desc">Calculado de envíos de hoy</div>
             </div>
         </div>
     </div>
@@ -78,24 +78,22 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @forelse($recentActivity as $activity)
                         <tr>
-                            <td>#001</td>
-                            <td>Nuevo paquete registrado</td>
-                            <td><span class="badge rounded-full badge-success">Completado</span></td>
-                            <td>Hace 5 minutos</td>
+                            <td>{{ $activity->envio->paquete->codigo ?? 'N/A' }}</td>
+                            <td>{{ $activity->comentario ?? 'Sin descripción' }}</td>
+                            <td>
+                                <span class="badge rounded-full badge-primary">
+                                    {{ $activity->estadoEnvio->nombre ?? 'Desconocido' }}
+                                </span>
+                            </td>
+                            <td>{{ $activity->created_at->diffForHumans() }}</td>
                         </tr>
+                        @empty
                         <tr>
-                            <td>#002</td>
-                            <td>Paquete en tránsito</td>
-                            <td><span class="badge rounded-full badge-warning">En proceso</span></td>
-                            <td>Hace 15 minutos</td>
+                            <td colspan="4" class="text-center">No hay actividad reciente</td>
                         </tr>
-                        <tr>
-                            <td>#003</td>
-                            <td>Entrega confirmada</td>
-                            <td><span class="badge rounded-full badge-success">Completado</span></td>
-                            <td>Hace 1 hora</td>
-                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

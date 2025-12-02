@@ -83,6 +83,8 @@
                             <th>Receptor</th>
                             <th>Descripción</th>
                             <th>Peso</th>
+                            <th>Volumen</th>
+                            <th>Costo</th>
                             <th>Fecha Estimada</th>
                             <th>Acciones</th>
                         </tr>
@@ -93,6 +95,7 @@
                         $emisor = $envio->paquete->envioClientes->where('tipo_cliente', 'emisor')->first()?->cliente;
                         $receptor = $envio->paquete->envioClientes->where('tipo_cliente', 'receptor')->first()?->cliente;
                         @endphp
+
                         <tr>
                             <td class="font-mono font-bold">{{ $envio->paquete->codigo }}</td>
                             <td>
@@ -109,6 +112,8 @@
                                 </div>
                             </td>
                             <td>{{ $envio->paquete->peso }} kg</td>
+                            <td>{{ $envio->paquete->dimensiones }} m³</td>
+                            <td>${{ number_format($envio->costo, 2) }}</td>
                             <td>{{ \Carbon\Carbon::parse($envio->fecha_estimada)->format('d/m/Y') }}</td>
                             <td>
                                 <button wire:click="openAssignModal({{ $envio->id }})"
@@ -469,23 +474,24 @@
 
                     <!-- Tipo de Envío -->
                     <div class="relative group">
-                        <select wire:model="tipo_envio" id="tipo_envio"
-                            class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('tipo_envio') border-error @enderror">
-                            <option value="estandar">Estándar</option>
-                            <option value="express">Express</option>
-                            <option value="overnight">Overnight</option>
+                        <select wire:model="tipo_envio_id" id="tipo_envio_id"
+                            class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('tipo_envio_id') border-error @enderror">
+                            <option value="">Seleccione un tipo</option>
+                            @foreach($tiposEnvio as $tipo)
+                            <option value="{{ $tipo->id }}">{{ ucfirst($tipo->nombre) }}</option>
+                            @endforeach
                         </select>
-                        <label for="tipo_envio"
+                        <label for="tipo_envio_id"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary left-1">
                             Tipo de Envío <span class="text-error">*</span>
                         </label>
-                        @error('tipo_envio') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                        @error('tipo_envio_id') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
 
                     <!-- Fecha Estimada -->
                     <div class="relative group">
-                        <input type="date" wire:model="fecha_estimada" id="fecha_estimada"
+                        <input type="date" wire:model="fecha_estimada" id="fecha_estimada" min="{{ \Carbon\Carbon::now()->setTimezone('America/El_Salvador')->format('Y-m-d') }}"
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('fecha_estimada') border-error @enderror"
                             placeholder=" " />
                         <label for="fecha_estimada"
@@ -503,7 +509,7 @@
                             <span class="label-text-alt text-base-content/60"
                                 x-text="lat && lng ? 'Ubicación seleccionada' : 'Seleccione ubicación en el mapa'"></span>
                         </label>
-                        <div id="receiver-map" class="leaflet-map border border-base-300 mb-4"></div>
+                        <div id="receiver-map" class="leaflet-map border border-base-300 mb-4" wire:ignore></div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="relative group">
@@ -520,6 +526,58 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Calculate Cost Button --}}
+                    <div class="flex justify-end mb-4">
+                        <button type="button" wire:click="calculateCost" class="btn btn-secondary btn-sm gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Calcular Costo
+                        </button>
+                    </div>
+
+                    {{-- Cost Calculation Display --}}
+                    @if($costo_calculado > 0)
+                    <div class="card bg-primary/10 border border-primary/20">
+                        <div class="card-body p-4">
+                            <h4 class="font-semibold text-lg mb-2 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Costo Calculado
+                            </h4>
+                            <div class="space-y-2 text-sm">
+                                @if($tipo_envio_id)
+                                @php
+                                $tipoEnvio = \App\Models\TipoEnvio::find($tipo_envio_id);
+                                @endphp
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">Tarifa Base:</span>
+                                    <span class="font-mono">${{ number_format($tipoEnvio->tarifa_base ?? 0, 2) }}</span>
+                                </div>
+                                @if($peso)
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">Peso ({{ $peso }} kg × ${{ number_format($tipoEnvio->tarifa_por_kg ?? 0, 2) }}):</span>
+                                    <span class="font-mono">${{ number_format($peso * ($tipoEnvio->tarifa_por_kg ?? 0), 2) }}</span>
+                                </div>
+                                @endif
+                                @if($volumen_m3 > 0)
+                                <div class="flex justify-between">
+                                    <span class="text-base-content/70">Volumen ({{ number_format($volumen_m3, 4) }} m³ × ${{ number_format($tipoEnvio->tarifa_por_m3 ?? 0, 2) }}):</span>
+                                    <span class="font-mono">${{ number_format($volumen_m3 * ($tipoEnvio->tarifa_por_m3 ?? 0), 2) }}</span>
+                                </div>
+                                @endif
+                                <div class="divider my-2"></div>
+                                @endif
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-lg">Total:</span>
+                                    <span class="font-bold text-2xl text-primary">${{ number_format($costo_calculado, 2) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 @endif
 
@@ -657,7 +715,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
-        document.addEventListener('alpine:init', () => {
+        const registerLocationPicker = () => {
+            // Check if already registered to avoid errors
+            if (Alpine.data('locationPicker')) return;
+
             Alpine.data('locationPicker', (latModel, lngModel) => ({
                 lat: latModel,
                 lng: lngModel,
@@ -667,14 +728,37 @@
                 initMap() {
                     // Wait for DOM to be ready and modal transition
                     setTimeout(() => {
-                        const mapId = this.$el.querySelector('.leaflet-map').id;
+                        const mapContainer = this.$el.querySelector('.leaflet-map');
+                        if (!mapContainer) {
+                            return;
+                        }
+
+                        // Fix: Check if map is already initialized on this element
+                        if (mapContainer._leaflet_map) {
+                            mapContainer._leaflet_map.remove();
+                            mapContainer._leaflet_map = null;
+                        }
+
+                        // Remove existing map from Alpine state if any
+                        if (this.map) {
+                            this.map.remove();
+                            this.map = null;
+                            this.marker = null;
+                        }
+
+                        // Ensure L (Leaflet) is available
+                        if (typeof L === 'undefined') {
+                            console.error('Leaflet is not loaded');
+                            return;
+                        }
 
                         // Default to El Salvador coordinates or current selection
                         const initialLat = this.lat || 13.6929;
                         const initialLng = this.lng || -89.2182;
                         const zoom = this.lat && this.lng ? 15 : 13;
 
-                        this.map = L.map(mapId).setView([initialLat, initialLng], zoom);
+                        this.map = L.map(mapContainer).setView([initialLat, initialLng], zoom);
+                        mapContainer._leaflet_map = this.map;
 
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -701,12 +785,21 @@
 
                         // Invalidate size to handle modal rendering issues
                         setTimeout(() => {
-                            this.map.invalidateSize();
-                        }, 100);
-                    }, 100);
+                            if (this.map) {
+                                this.map.invalidateSize();
+                            }
+                        }, 200);
+                    }, 200);
                 }
             }));
-        });
+        };
+
+        // Safe registration pattern
+        if (typeof Alpine !== 'undefined') {
+            registerLocationPicker();
+        } else {
+            document.addEventListener('alpine:init', registerLocationPicker);
+        }
     </script>
     @endpush
 </div>

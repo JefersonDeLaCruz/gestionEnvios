@@ -18,10 +18,12 @@ class PaqueteFactory extends Factory
     {
         return [
             'codigo' => fake()->unique()->numberBetween(100000000, 999999999),
-            'descripcion' => fake()->optional()->sentence(), 
+            'descripcion' => fake()->sentence(),
             'peso' => fake()->numberBetween(1, 100),
+            'longitud' => fake()->longitude(),
+            'latitud' =>fake()->latitude(),
             'dimensiones' => fake()->numberBetween(1, 100) . 'x' . fake()->numberBetween(1, 100) . 'x' . fake()->numberBetween(1, 100),
-            'tipo_envio' => fake()->randomElement(['estandar', 'express', 'overnight']), 
+            'tipo_envio_id' => \App\Models\TipoEnvio::inRandomOrder()->first()->id,
         ];
     }
 }

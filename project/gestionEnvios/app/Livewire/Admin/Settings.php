@@ -6,12 +6,13 @@ use Livewire\Component;
 use App\Models\EstadoEnvio;
 use App\Models\Tarifa;
 use App\Models\TipoVehiculo;
+use App\Models\TipoEnvio;
 use Illuminate\Support\Str;
 
 class Settings extends Component
 {
     public $activeTab = 'estados';
-    
+
     // Estados de Envío
     public $showEstadoModal = false;
     public $showEstadoDeleteModal = false;
@@ -43,8 +44,19 @@ class Settings extends Component
     public $tipoVehiculoDescripcion;
     public $tipoVehiculoActivo = true;
 
+    // Tipos de Envío
+    public $showTipoEnvioModal = false;
+    public $showTipoEnvioDeleteModal = false;
+    public $editTipoEnvioMode = false;
+    public $tipoEnvioId;
+    public $tipoEnvioNombre;
+    public $tipoEnvioPrioridad;
+    public $tipoEnvioTarifaBase;
+    public $tipoEnvioTarifaPorKg;
+    public $tipoEnvioTarifaPorM3;
+
     // ==================== ESTADOS DE ENVÍO ====================
-    
+
     public function openCreateEstadoModal()
     {
         $this->resetEstadoForm();
@@ -56,12 +68,12 @@ class Settings extends Component
     {
         $this->resetEstadoForm();
         $estado = EstadoEnvio::findOrFail($estadoId);
-        
+
         $this->estadoId = $estado->id;
         $this->estadoNombre = $estado->nombre;
         $this->estadoSlug = $estado->slug;
         $this->estadoEsFinal = $estado->es_final;
-        
+
         $this->editEstadoMode = true;
         $this->showEstadoModal = true;
     }
@@ -122,7 +134,7 @@ class Settings extends Component
     {
         $estado = EstadoEnvio::findOrFail($this->estadoId);
         $estado->delete();
-        
+
         $this->showEstadoDeleteModal = false;
         $this->estadoId = null;
         session()->flash('message', 'Estado eliminado exitosamente.');
@@ -142,7 +154,7 @@ class Settings extends Component
     }
 
     // ==================== TARIFAS ====================
-    
+
     public function openCreateTarifaModal()
     {
         $this->resetTarifaForm();
@@ -154,14 +166,14 @@ class Settings extends Component
     {
         $this->resetTarifaForm();
         $tarifa = Tarifa::findOrFail($tarifaId);
-        
+
         $this->tarifaId = $tarifa->id;
         $this->tarifaConcepto = $tarifa->concepto;
         $this->tarifaValor = $tarifa->valor;
         $this->tarifaTipo = $tarifa->tipo;
         $this->tarifaDescripcion = $tarifa->descripcion;
         $this->tarifaActivo = $tarifa->activo;
-        
+
         $this->editTarifaMode = true;
         $this->showTarifaModal = true;
     }
@@ -230,7 +242,7 @@ class Settings extends Component
     {
         $tarifa = Tarifa::findOrFail($this->tarifaId);
         $tarifa->delete();
-        
+
         $this->showTarifaDeleteModal = false;
         $this->tarifaId = null;
         session()->flash('message', 'Tarifa eliminada exitosamente.');
@@ -246,13 +258,13 @@ class Settings extends Component
     {
         $tarifa = Tarifa::findOrFail($tarifaId);
         $tarifa->update(['activo' => !$tarifa->activo]);
-        
+
         $status = $tarifa->activo ? 'activada' : 'desactivada';
         session()->flash('message', "Tarifa {$status} exitosamente.");
     }
 
     // ==================== TIPOS DE VEHÍCULOS ====================
-    
+
     public function openCreateTipoVehiculoModal()
     {
         $this->resetTipoVehiculoForm();
@@ -264,14 +276,14 @@ class Settings extends Component
     {
         $this->resetTipoVehiculoForm();
         $tipoVehiculo = TipoVehiculo::findOrFail($tipoVehiculoId);
-        
+
         $this->tipoVehiculoId = $tipoVehiculo->id;
         $this->tipoVehiculoNombre = $tipoVehiculo->nombre;
         $this->tipoVehiculoCapacidadKg = $tipoVehiculo->capacidad_max_kg;
         $this->tipoVehiculoCapacidadM3 = $tipoVehiculo->capacidad_max_m3;
         $this->tipoVehiculoDescripcion = $tipoVehiculo->descripcion;
         $this->tipoVehiculoActivo = $tipoVehiculo->activo;
-        
+
         $this->editTipoVehiculoMode = true;
         $this->showTipoVehiculoModal = true;
     }
@@ -339,7 +351,7 @@ class Settings extends Component
     {
         $tipoVehiculo = TipoVehiculo::findOrFail($this->tipoVehiculoId);
         $tipoVehiculo->delete();
-        
+
         $this->showTipoVehiculoDeleteModal = false;
         $this->tipoVehiculoId = null;
         session()->flash('message', 'Tipo de vehículo eliminado exitosamente.');
@@ -355,9 +367,113 @@ class Settings extends Component
     {
         $tipoVehiculo = TipoVehiculo::findOrFail($tipoVehiculoId);
         $tipoVehiculo->update(['activo' => !$tipoVehiculo->activo]);
-        
+
         $status = $tipoVehiculo->activo ? 'activado' : 'desactivado';
         session()->flash('message', "Tipo de vehículo {$status} exitosamente.");
+    }
+
+    // ==================== TIPOS DE ENVÍO ====================
+
+    public function openCreateTipoEnvioModal()
+    {
+        $this->resetTipoEnvioForm();
+        $this->editTipoEnvioMode = false;
+        $this->showTipoEnvioModal = true;
+    }
+
+    public function openEditTipoEnvioModal($tipoEnvioId)
+    {
+        $this->resetTipoEnvioForm();
+        $tipoEnvio = TipoEnvio::findOrFail($tipoEnvioId);
+
+        $this->tipoEnvioId = $tipoEnvio->id;
+        $this->tipoEnvioNombre = $tipoEnvio->nombre;
+        $this->tipoEnvioPrioridad = $tipoEnvio->prioridad;
+        $this->tipoEnvioTarifaBase = $tipoEnvio->tarifa_base;
+        $this->tipoEnvioTarifaPorKg = $tipoEnvio->tarifa_por_kg;
+        $this->tipoEnvioTarifaPorM3 = $tipoEnvio->tarifa_por_m3;
+
+        $this->editTipoEnvioMode = true;
+        $this->showTipoEnvioModal = true;
+    }
+
+    public function closeTipoEnvioModal()
+    {
+        $this->showTipoEnvioModal = false;
+        $this->resetTipoEnvioForm();
+        $this->resetValidation();
+    }
+
+    public function resetTipoEnvioForm()
+    {
+        $this->tipoEnvioId = null;
+        $this->tipoEnvioNombre = '';
+        $this->tipoEnvioPrioridad = '';
+        $this->tipoEnvioTarifaBase = '';
+        $this->tipoEnvioTarifaPorKg = '';
+        $this->tipoEnvioTarifaPorM3 = '';
+    }
+
+    public function saveTipoEnvio()
+    {
+        $this->validate([
+            'tipoEnvioNombre' => 'required|string|max:255',
+            'tipoEnvioPrioridad' => 'required|integer|min:1',
+            'tipoEnvioTarifaBase' => 'required|numeric|min:0',
+            'tipoEnvioTarifaPorKg' => 'required|numeric|min:0',
+            'tipoEnvioTarifaPorM3' => 'required|numeric|min:0',
+        ], [
+            'tipoEnvioNombre.required' => 'El nombre es obligatorio',
+            'tipoEnvioPrioridad.required' => 'La prioridad es obligatoria',
+            'tipoEnvioTarifaBase.required' => 'La tarifa base es obligatoria',
+            'tipoEnvioTarifaPorKg.required' => 'La tarifa por kg es obligatoria',
+            'tipoEnvioTarifaPorM3.required' => 'La tarifa por m³ es obligatoria',
+        ]);
+
+        if ($this->editTipoEnvioMode) {
+            $tipoEnvio = TipoEnvio::findOrFail($this->tipoEnvioId);
+            $tipoEnvio->update([
+                'nombre' => $this->tipoEnvioNombre,
+                'prioridad' => $this->tipoEnvioPrioridad,
+                'tarifa_base' => $this->tipoEnvioTarifaBase,
+                'tarifa_por_kg' => $this->tipoEnvioTarifaPorKg,
+                'tarifa_por_m3' => $this->tipoEnvioTarifaPorM3,
+            ]);
+            session()->flash('message', 'Tipo de envío actualizado exitosamente.');
+        } else {
+            TipoEnvio::create([
+                'nombre' => $this->tipoEnvioNombre,
+                'prioridad' => $this->tipoEnvioPrioridad,
+                'tarifa_base' => $this->tipoEnvioTarifaBase,
+                'tarifa_por_kg' => $this->tipoEnvioTarifaPorKg,
+                'tarifa_por_m3' => $this->tipoEnvioTarifaPorM3,
+            ]);
+            session()->flash('message', 'Tipo de envío creado exitosamente.');
+        }
+
+        $this->closeTipoEnvioModal();
+    }
+
+    public function confirmDeleteTipoEnvio($tipoEnvioId)
+    {
+        $this->tipoEnvioId = $tipoEnvioId;
+        $this->showTipoEnvioDeleteModal = true;
+    }
+
+    public function deleteTipoEnvio()
+    {
+        $tipoEnvio = TipoEnvio::findOrFail($this->tipoEnvioId);
+        $tipoEnvio->delete();
+
+        $this->showTipoEnvioDeleteModal = false;
+        $this->tipoEnvioId = null;
+        session()->flash('message', 'Tipo de envío eliminado exitosamente.');
+    }
+
+    public function cancelDeleteTipoEnvio()
+    {
+        $this->showTipoEnvioDeleteModal = false;
+        $this->tipoEnvioId = null;
     }
 
     public function render()
@@ -365,12 +481,13 @@ class Settings extends Component
         $estados = EstadoEnvio::all();
         $tarifas = Tarifa::all();
         $tipoVehiculos = TipoVehiculo::all();
+        $tiposEnvio = TipoEnvio::orderBy('prioridad')->get();
 
         return view('livewire.admin.settings', [
             'estados' => $estados,
             'tarifas' => $tarifas,
             'tipoVehiculos' => $tipoVehiculos,
+            'tiposEnvio' => $tiposEnvio,
         ])->layout('layout.base-drawer');
     }
 }
-

@@ -88,7 +88,7 @@
                         <tr>
                             <th>Tracking</th>
                             <th>Paquete</th>
-                            <th>Dirección</th>
+                            <th>prioridad</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -116,9 +116,8 @@
                             </td>
 
                             <td>
-                                {{-- Si la dirección está en otra relación (por ejemplo cliente), cámbiala aquí --}}
                                 <div class="text-sm">
-                                    {{ $envio->cliente->direccion ?? 'Dirección no disponible' }}
+                                    {{ $envio->paquete->tipoEnvio->nombre }}
                                 </div>
                             </td>
 

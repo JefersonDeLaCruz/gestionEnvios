@@ -9,6 +9,7 @@ use App\Models\Cliente;
 use App\Models\EnvioCliente;
 use App\Models\User;
 use App\Models\EstadoEnvio;
+use App\Models\TipoEnvio;
 
 class Packages extends Component
 {
@@ -29,6 +30,7 @@ class Packages extends Component
     public $search = '';
     public $status = '';
     public $statuses = [];
+    public $tiposEnvio = [];
     public $date = '';
 
     // Sender information
@@ -63,8 +65,10 @@ class Packages extends Component
     public $descripcion = '';
     public $peso = '';
     public $dimensiones = '';
-    public $tipo_envio = 'estandar';
+    public $tipo_envio_id = null;
     public $fecha_estimada = '';
+    public $costo_calculado = 0;
+    public $volumen_m3 = 0;
 
     public function updatedSearch()
     {
@@ -191,7 +195,7 @@ class Packages extends Component
             'descripcion',
             'peso',
             'dimensiones',
-            'tipo_envio',
+            'tipo_envio_id',
             'fecha_estimada'
         ]);
     }
@@ -239,6 +243,66 @@ class Packages extends Component
         }
     }
 
+    public function updatedPeso()
+    {
+        $this->calculateCost();
+    }
+
+    public function updatedDimensiones()
+    {
+        $this->calculateVolume();
+        $this->calculateCost();
+    }
+
+    public function updatedTipoEnvioId()
+    {
+        $this->calculateCost();
+    }
+
+    private function calculateVolume()
+    {
+        if (empty($this->dimensiones)) {
+            $this->volumen_m3 = 0;
+            return;
+        }
+
+        // Parse dimensions (e.g., "30x20x15" in cm)
+        $parts = preg_split('/[xX*×]/', $this->dimensiones);
+        if (count($parts) === 3) {
+            $largo = floatval(trim($parts[0]));
+            $ancho = floatval(trim($parts[1]));
+            $alto = floatval(trim($parts[2]));
+
+            // Convert cm³ to m³
+            $this->volumen_m3 = ($largo * $ancho * $alto) / 1000000;
+        } else {
+            $this->volumen_m3 = 0;
+        }
+    }
+
+    public function calculateCost()
+    {
+        if (!$this->tipo_envio_id || !$this->peso) {
+            $this->costo_calculado = 0;
+            return;
+        }
+
+        $tipoEnvio = TipoEnvio::find($this->tipo_envio_id);
+        if (!$tipoEnvio) {
+            $this->costo_calculado = 0;
+            return;
+        }
+
+        $this->calculateVolume();
+
+        // Calculate cost: base + (peso * tarifa_kg) + (volumen * tarifa_m3)
+        $costoBase = $tipoEnvio->tarifa_base ?? 0;
+        $costoPeso = ($this->peso ?? 0) * ($tipoEnvio->tarifa_por_kg ?? 0);
+        $costoVolumen = $this->volumen_m3 * ($tipoEnvio->tarifa_por_m3 ?? 0);
+
+        $this->costo_calculado = $costoBase + $costoPeso + $costoVolumen;
+    }
+
     public function save()
     {
         // Validate only package information (step 3)
@@ -247,8 +311,8 @@ class Packages extends Component
             'descripcion' => 'required|string|max:1000',
             'peso' => 'required|numeric|min:0.01',
             'dimensiones' => 'nullable|string|max:255',
-            'tipo_envio' => 'required|in:estandar,express,overnight',
-            'fecha_estimada' => 'required|date|after_or_equal:today',
+            'tipo_envio_id' => 'required|exists:tipos_envio,id',
+            'fecha_estimada' => 'required|date|after_or_equal:' . \Carbon\Carbon::now()->setTimezone('America/El_Salvador')->format('Y-m-d'),
             'receiver_lat' => 'required|numeric|between:-90,90',
             'receiver_lng' => 'required|numeric|between:-180,180',
         ]);
@@ -311,7 +375,7 @@ class Packages extends Component
             'descripcion' => $this->descripcion,
             'peso' => $this->peso,
             'dimensiones' => $this->dimensiones,
-            'tipo_envio' => $this->tipo_envio,
+            'tipo_envio_id' => $this->tipo_envio_id,
             'latitud' => $this->receiver_lat,
             'longitud' => $this->receiver_lng,
         ]);
@@ -335,6 +399,7 @@ class Packages extends Component
             'paquete_id' => $paquete->id,
             'fecha_estimada' => $this->fecha_estimada,
             'estado_envio_id' => 1, // Default to pending
+            'costo' => $this->costo_calculado,
         ]);
 
         session()->flash('message', 'Envío creado exitosamente.');
@@ -345,13 +410,15 @@ class Packages extends Component
     public function mount()
     {
         $this->statuses = EstadoEnvio::all();
+        $this->tiposEnvio = TipoEnvio::all();
         $this->loadPendingShipments();
     }
 
     public function loadPendingShipments()
     {
         $query = Envio::query()
-            ->with(['paquete.envioClientes.cliente', 'estadoEnvio']);
+            ->with(['paquete.envioClientes.cliente', 'estadoEnvio'])
+            ->whereNull('motorista_id'); // Only show unassigned shipments
 
         if ($this->search) {
             $query->whereHas('paquete', function ($q) {
