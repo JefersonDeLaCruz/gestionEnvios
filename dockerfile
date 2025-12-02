@@ -27,15 +27,22 @@ RUN printf "<Directory /var/www/html>\nOptions Indexes FollowSymLinks\nAllowOver
 RUN groupadd -g ${GID} laravel && \
     useradd -u ${UID} -g ${GID} -m laravel
 
+# Dar permisos al webroot
+RUN chown -R laravel:laravel /var/www/html
+
+# Copiar script de entrada
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Configurar Apache para correr como el usuario laravel
 RUN sed -i "s/export APACHE_RUN_USER=.*/export APACHE_RUN_USER=laravel/" /etc/apache2/envvars && \
     sed -i "s/export APACHE_RUN_GROUP=.*/export APACHE_RUN_GROUP=laravel/" /etc/apache2/envvars
 
-# Dar permisos al webroot
-RUN chown -R laravel:laravel /var/www/html
+WORKDIR /var/www/html
+EXPOSE 80
 
-# Cambiar a usuario no root
+# Cambiar a usuario laravel
 USER laravel
 
-WORKDIR /var/www/html
-EXPOSE 8000
+# Usar el script de entrada
+CMD ["/usr/local/bin/entrypoint.sh"]
