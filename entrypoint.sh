@@ -26,7 +26,7 @@ if [ ! -d "vendor" ]; then
     php artisan key:generate 
     
     echo "- Ejecutando migraciones"
-    php artisan migrate 
+    php artisan migrateS --force
     
     echo "- Ejecutando seeders"
     php artisan db:seed 
