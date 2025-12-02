@@ -1,6 +1,6 @@
 @extends('layout.base')
 
-@section('title', 'Login | PACXPRESS')
+@section('title', 'Iniciar Sesión | PACXPRESS')
 
 @section('content')
 <style>
@@ -37,11 +37,7 @@
     .delay-200 { animation-delay: 0.2s; }
 </style>
 
-<div 
-    x-data="{ loginOpen: false, registerOpen: false }"
-    @open-register-modal.window="loginOpen = false; registerOpen = true"
-    @open-login-modal.window="registerOpen = false; loginOpen = true"
->
+<div x-data="{ loginOpen: false }">
 
     {{-- ===================== LOGIN MODAL ===================== --}}
     <div 
@@ -49,9 +45,10 @@
         x-cloak 
         style="display: none;" 
         class="fixed inset-0 z-50 overflow-y-auto"
-        aria-labelledby="modal-title" 
+        aria-labelledby="login-modal-title" 
         role="dialog" 
         aria-modal="true"
+        @keydown.escape.window="loginOpen = false"
     >
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             {{-- Fondo oscuro --}}
@@ -80,12 +77,14 @@
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 class="inline-block align-bottom bg-base-100 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[600px] sm:w-full min-h-[400px] relative"
+                role="document"
             >
                 <button 
                     @click="loginOpen = false"
-                    class="absolute top-4 left-4 p-2 rounded-full hover:bg-base-200 transition z-10"
+                    class="absolute top-4 left-4 p-2 rounded-full hover:bg-base-200 transition z-10 focus:outline-none focus:ring-2 focus:ring-secondary"
+                    aria-label="Cerrar modal de inicio de sesión"
                 >
-                    <svg class="w-5 h-5 text-base-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-base-content" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                             d="M6 18L18 6M6 6l12 12">
                         </path>
@@ -100,67 +99,11 @@
         </div>
     </div>
 
-    {{-- ===================== REGISTER MODAL ===================== --}}
-    <div 
-        x-show="registerOpen" 
-        x-cloak 
-        style="display: none;" 
-        class="fixed inset-0 z-50 overflow-y-auto"
-        aria-labelledby="modal-title" 
-        role="dialog" 
-        aria-modal="true"
-    >
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            {{-- Fondo oscuro --}}
-            <div 
-                x-show="registerOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0"
-                x-transition:enter-end="opacity-100"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="fixed inset-0 bg-[rgba(91,112,131,0.4)] transition-opacity"
-                aria-hidden="true"
-                @click="registerOpen = false"
-            ></div>
-
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-            {{-- Tarjeta del modal --}}
-            <div 
-                x-show="registerOpen"
-                x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave="ease-in duration-200"
-                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                class="inline-block align-bottom bg-base-100 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[600px] sm:w-full min-h-[400px] relative"
-            >
-                <button 
-                    @click="registerOpen = false"
-                    class="absolute top-4 left-4 p-2 rounded-full hover:bg-base-200 transition z-10"
-                >
-                    <svg class="w-5 h-5 text-base-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                            d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
-                </button>
-
-                <div class="p-6">
-                    {{-- Componente Livewire del registro --}}
-                    <livewire:register-form />
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- ===================== CONTENIDO PRINCIPAL ===================== --}}
-    <div class="bg-base-100 min-h-screen flex flex-col justify-center items-center lg:flex-row text-base-content p-4 lg:p-0 overflow-hidden">
+    <main class="bg-base-100 min-h-screen flex flex-col justify-center items-center lg:flex-row text-base-content p-4 lg:p-0 overflow-hidden">
 
-        <div class="w-full lg:w-1/2 flex justify-center items-center h-full mb-10 lg:mb-0">
+        {{-- Logo decorativo --}}
+        <div class="w-full lg:w-1/2 flex justify-center items-center h-full mb-10 lg:mb-0" aria-hidden="true">
             <svg viewBox="0 0 24 24" aria-hidden="true"
                 class="h-16 w-16 lg:h-[350px] lg:w-[350px] fill-current text-base-content cursor-default">
                 <g>
@@ -171,7 +114,8 @@
             </svg>
         </div>
 
-        <div class="w-full lg:w-1/2 flex flex-col justify-center items-center lg:items-start px-4 lg:pl-10 max-w-2xl text-center lg:text-left">
+        {{-- Sección de acciones --}}
+        <section class="w-full lg:w-1/2 flex flex-col justify-center items-center lg:items-start px-4 lg:pl-10 max-w-2xl text-center lg:text-left">
 
             <div class="opacity-0 animate-enter">
                 <h1 class="text-5xl lg:text-7xl font-extrabold mb-12 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-base-content via-base-content/60 to-secondary animate-gradient-x pb-2">
@@ -180,41 +124,34 @@
             </div>
 
             <div class="opacity-0 animate-enter delay-100">
-                <h2 class="text-3xl font-bold mb-8">Comienza a gestionar</h2>
+                <h2 class="text-3xl font-bold mb-8">Accede a tu cuenta</h2>
             </div>
 
-            <div class="w-full max-w-[300px] flex flex-col gap-3 opacity-0 animate-enter delay-200">
+            <nav class="w-full max-w-[300px] flex flex-col gap-4 opacity-0 animate-enter delay-200" aria-label="Navegación principal">
+                
+                {{-- Botón principal: Iniciar sesión --}}
+                <button
+                    type="button"
+                    @click="loginOpen = true"
+                    class="w-full btn btn-secondary font-bold py-2.5 px-4 rounded-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary"
+                    aria-haspopup="dialog"
+                >
+                    Iniciar sesión
+                </button>
 
-                <a href="{{ route('home') }}" class="btn btn-ghost rounded-full">
-                    Ir a Inicio
-                </a>
-
-                <div class="flex items-center w-full my-1">
+                <div class="flex items-center w-full my-2" aria-hidden="true">
                     <div class="h-px bg-base-300 flex-1"></div>
                 </div>
 
-                <div class="w-full max-w-[300px] space-y-3">
-                    {{-- Abrir modal de registro --}}
-                    <button
-                        type="button"
-                        @click="registerOpen = true"
-                        class="w-full btn btn-secondary font-bold py-2.5 px-4 rounded-full transition duration-200">
-                        Crear cuenta
-                    </button>
-
-                    <div class="pt-10">
-                        <h3 class="font-bold text-center text-[17px] mb-4">¿Ya tienes una cuenta?</h3>
-                        {{-- Abrir modal de login --}}
-                        <button
-                            type="button"
-                            @click="loginOpen = true"
-                            class="w-full btn btn-outline btn-secondary font-bold py-2.5 px-4 rounded-full transition duration-200">
-                            Iniciar sesión
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                {{-- Botón secundario: Ir a Inicio --}}
+                <a 
+                    href="{{ route('home') }}" 
+                    class="btn btn-outline btn-secondary rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary"
+                >
+                    Ir a Inicio
+                </a>
+            </nav>
+        </section>
+    </main>
 </div>
 @endsection
