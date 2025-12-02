@@ -1,4 +1,70 @@
-<div class="p-6">
+<div class="p-6" x-data="{
+    map: null,
+    markers: [],
+    userMarker: null,
+    initMap() {
+        // Default to San Salvador if no location
+        this.map = L.map('map').setView([13.6929, -89.2182], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(this.map);
+
+        // Try to get user location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                if (this.userMarker) this.map.removeLayer(this.userMarker);
+                
+                const userIcon = L.divIcon({
+                    className: 'bg-primary rounded-full border-2 border-white shadow-lg',
+                    iconSize: [12, 12]
+                });
+
+                this.userMarker = L.marker([lat, lng], {icon: userIcon}).addTo(this.map)
+                    .bindPopup('Tu ubicación');
+                
+                // Only center if no package selected yet
+                if (this.markers.length === 0) {
+                    this.map.setView([lat, lng], 14);
+                }
+            });
+        }
+    },
+    updateMap(lat, lng, address) {
+        if (!this.map) this.initMap();
+        
+        // Clear existing destination markers
+        this.markers.forEach(m => this.map.removeLayer(m));
+        this.markers = [];
+        
+        // Add new marker
+        const marker = L.marker([lat, lng]).addTo(this.map)
+            .bindPopup(address)
+            .openPopup();
+        this.markers.push(marker);
+        
+        this.map.setView([lat, lng], 16);
+    }
+}" x-init="initMap()" @envio-selected.window="updateMap($event.detail.lat, $event.detail.lng, $event.detail.address)">
+
+    @push('styles')
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+        <style>
+            #map {
+                height: 100%;
+                width: 100%;
+                z-index: 1;
+            }
+        </style>
+    @endpush
+
+    @push('scripts')
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    @endpush
     <!-- Page Header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold">Ruta del Día</h1>
@@ -70,51 +136,36 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Map Placeholder -->
+        <!-- Map Section -->
         <div class="lg:col-span-2">
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h2 class="card-title">Mapa de Ruta</h2>
-                    <!-- Map Placeholder - Ready for Google Maps or similar integration -->
-                    <div class="bg-base-200 rounded-lg h-96 flex items-center justify-center relative overflow-hidden">
-                        <!-- Decorative map-like background -->
-                        <div class="absolute inset-0 opacity-10">
-                            <svg class="w-full h-full" viewBox="0 0 400 400">
-                                <line x1="0" y1="100" x2="400" y2="100" stroke="currentColor" stroke-width="1" />
-                                <line x1="0" y1="200" x2="400" y2="200" stroke="currentColor" stroke-width="1" />
-                                <line x1="0" y1="300" x2="400" y2="300" stroke="currentColor" stroke-width="1" />
-                                <line x1="100" y1="0" x2="100" y2="400" stroke="currentColor" stroke-width="1" />
-                                <line x1="200" y1="0" x2="200" y2="400" stroke="currentColor" stroke-width="1" />
-                                <line x1="300" y1="0" x2="300" y2="400" stroke="currentColor" stroke-width="1" />
-                            </svg>
+            <div class="card bg-base-100 shadow-xl h-full">
+                <div class="card-body p-0 overflow-hidden relative h-[500px] rounded-box">
+                    <div id="map" class="h-full w-full" wire:ignore></div>
+
+                    <!-- Map Controls Overlay -->
+                    <div class="absolute bottom-4 left-4 right-4 z-[1000] flex justify-between pointer-events-none">
+                        <div class="pointer-events-auto">
+                            @if($selectedEnvio)
+                                <div
+                                    class="bg-base-100/90 backdrop-blur p-3 rounded-lg shadow-lg border border-base-200 max-w-xs">
+                                    <h3 class="font-bold text-sm">{{ $selectedEnvio->paquete->codigo }}</h3>
+                                    <p class="text-xs opacity-70 truncate">
+                                        {{ $selectedEnvio->paquete->direccion ?? 'Sin dirección' }}</p>
+                                    <div class="mt-2 flex gap-2">
+                                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ $selectedEnvio->paquete->latitud }},{{ $selectedEnvio->paquete->longitud }}"
+                                            target="_blank" class="btn btn-primary btn-xs gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                                class="w-3 h-3">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Navegar
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
-                        <div class="text-center z-10">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" class="w-16 h-16 mx-auto mb-4 opacity-50">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
-                            </svg>
-                            <p class="text-base-content/50 font-medium">Integración de Mapa</p>
-                            <p class="text-sm text-base-content/40 mt-2">Google Maps / Mapbox / OpenStreetMap</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 mt-4">
-                        <button class="btn btn-primary btn-sm gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                            Iniciar Navegación
-                        </button>
-                        <button class="btn btn-ghost btn-sm gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Reoptimizar Ruta
-                        </button>
                     </div>
                 </div>
             </div>
@@ -134,78 +185,41 @@
                     </div>
 
                     <div class="overflow-y-auto max-h-96 space-y-3">
-                        <!-- Stop 1 - Completed -->
-                        <div class="flex items-start gap-3 p-3 bg-success/10 rounded-lg border border-success/20">
-                            <div class="badge badge-success badge-lg">✓</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-semibold text-sm truncate">#PKG001</div>
-                                <div class="text-xs text-base-content/70 truncate">Juan Pérez</div>
-                                <div class="text-xs text-base-content/60 mt-1">Calle 1 #123</div>
-                                <div class="text-xs text-success mt-1">✓ Entregado 08:30 AM</div>
-                            </div>
-                        </div>
+                        @forelse($envios as $envio)
+                            <div wire:click="selectEnvio({{ $envio->id }})"
+                                class="flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all {{ $selectedEnvio && $selectedEnvio->id == $envio->id ? 'bg-primary/10 border border-primary' : 'bg-base-200 hover:bg-base-300' }}">
 
-                        <!-- Stop 2 - In Progress -->
-                        <div class="flex items-start gap-3 p-3 bg-warning/10 rounded-lg border-2 border-warning">
-                            <div class="badge badge-warning badge-lg">→</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-semibold text-sm truncate">#PKG013</div>
-                                <div class="text-xs text-base-content/70 truncate">Carlos Méndez</div>
-                                <div class="text-xs text-base-content/60 mt-1">Av. Principal #456</div>
-                                <div class="text-xs text-warning mt-1 font-semibold">→ Siguiente parada</div>
-                            </div>
-                        </div>
+                                @php
+                                    $statusColor = match ($envio->estadoEnvio->slug ?? '') {
+                                        'entregado' => 'success',
+                                        'pendiente' => 'warning',
+                                        'no-entregado' => 'error',
+                                        default => 'ghost'
+                                    };
+                                    $statusIcon = match ($envio->estadoEnvio->slug ?? '') {
+                                        'entregado' => '✓',
+                                        'pendiente' => '→',
+                                        'no-entregado' => '✕',
+                                        default => '?'
+                                    };
+                                @endphp
 
-                        <!-- Stop 3 - Pending -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 cursor-pointer transition-all">
-                            <div class="badge badge-ghost badge-lg">3</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-semibold text-sm truncate">#PKG014</div>
-                                <div class="text-xs text-base-content/70 truncate">Ana Ruiz</div>
-                                <div class="text-xs text-base-content/60 mt-1">Calle Flores #789</div>
-                                <div class="text-xs text-base-content/50 mt-1">2.3 km</div>
+                                <div class="badge badge-{{ $statusColor }} badge-lg">{{ $statusIcon }}</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-semibold text-sm truncate">{{ $envio->paquete->codigo }}</div>
+                                    <div class="text-xs text-base-content/70 truncate">{{ $envio->paquete->descripcion }}
+                                    </div>
+                                    <div class="text-xs text-base-content/60 mt-1">
+                                        {{ $envio->paquete->direccion ?? 'Sin dirección' }}</div>
+                                    <div class="text-xs text-{{ $statusColor }} mt-1 font-semibold">
+                                        {{ $envio->estadoEnvio->nombre ?? 'Desconocido' }}</div>
+                                </div>
                             </div>
-                        </div>
-
-                        <!-- Stop 4 - Pending -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 cursor-pointer transition-all">
-                            <div class="badge badge-ghost badge-lg">4</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-semibold text-sm truncate">#PKG015</div>
-                                <div class="text-xs text-base-content/70 truncate">Luis Torres</div>
-                                <div class="text-xs text-base-content/60 mt-1">Blvd. Norte #321</div>
-                                <div class="text-xs text-base-content/50 mt-1">3.1 km</div>
+                        @empty
+                            <div class="text-center py-8 text-base-content/50">
+                                No tienes paquetes asignados hoy.
                             </div>
-                        </div>
-
-                        <!-- Stop 5 - Pending Priority -->
-                        <div class="flex items-start gap-3 p-3 bg-error/10 rounded-lg border border-error/20">
-                            <div class="badge badge-error badge-lg">!</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-semibold text-sm truncate">#PKG016</div>
-                                <div class="text-xs text-base-content/70 truncate">María García</div>
-                                <div class="text-xs text-base-content/60 mt-1">Col. Centro #654</div>
-                                <div class="text-xs text-error mt-1 font-semibold">Urgente - Antes 3:00 PM</div>
-                            </div>
-                        </div>
-
-                        <!-- More stops... -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 cursor-pointer transition-all">
-                            <div class="badge badge-ghost badge-lg">6</div>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-semibold text-sm truncate">#PKG017</div>
-                                <div class="text-xs text-base-content/70 truncate">Roberto Sánchez</div>
-                                <div class="text-xs text-base-content/60 mt-1">Av. Sur #987</div>
-                                <div class="text-xs text-base-content/50 mt-1">4.5 km</div>
-                            </div>
-                        </div>
-
-                        <div class="text-center py-2 text-sm text-base-content/50">
-                            + 12 paradas más
-                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -215,71 +229,78 @@
     <!-- Route Timeline -->
     <div class="card bg-base-100 shadow-xl mt-6">
         <div class="card-body">
-            <h2 class="card-title mb-4">Línea de Tiempo de la Ruta</h2>
-            <ul class="timeline timeline-vertical">
-                <li>
-                    <div class="timeline-start timeline-box bg-success/20 border-success">
-                        <div class="font-bold text-sm">08:00 AM - Inicio</div>
-                        <div class="text-xs">Centro de Distribución</div>
+            <h2 class="card-title mb-4">Detalles del Paquete</h2>
+            @if($selectedEnvio)
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-bold text-lg">{{ $selectedEnvio->paquete->codigo }}</h3>
+                        <p class="text-base-content/70">{{ $selectedEnvio->paquete->descripcion }}</p>
+
+                        <div class="mt-4 space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm font-medium">Estado:</span>
+                                <span
+                                    class="badge badge-{{ match ($selectedEnvio->estadoEnvio->slug ?? '') { 'entregado' => 'success', 'pendiente' => 'warning', 'no-entregado' => 'error', default => 'ghost'} }}">
+                                    {{ $selectedEnvio->estadoEnvio->nombre ?? 'Desconocido' }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm font-medium">Peso:</span>
+                                <span>{{ $selectedEnvio->paquete->peso }} kg</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm font-medium">Dimensiones:</span>
+                                <span>{{ $selectedEnvio->paquete->dimensiones }}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex flex-wrap gap-2">
+                            <button wire:click="updateStatus({{ $selectedEnvio->id }}, 'entregado')"
+                                class="btn btn-success btn-sm text-white" {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado' ? 'disabled' : '' }}>
+                                Marcar Entregado
+                            </button>
+                            <button wire:click="updateStatus({{ $selectedEnvio->id }}, 'no-entregado')"
+                                class="btn btn-error btn-sm text-white" {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'no-entregado' ? 'disabled' : '' }}>
+                                No Entregado
+                            </button>
+                            <button wire:click="updateStatus({{ $selectedEnvio->id }}, 'pendiente')"
+                                class="btn btn-warning btn-sm text-white" {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'pendiente' ? 'disabled' : '' }}>
+                                Pendiente
+                            </button>
+                        </div>
                     </div>
-                    <div class="timeline-middle">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                            class="w-5 h-5 text-success">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                                clip-rule="evenodd" />
-                        </svg>
+
+                    <div>
+                        <h4 class="font-bold mb-2">Historial</h4>
+                        <ul class="steps steps-vertical w-full">
+                            @foreach($selectedEnvio->historialEnvios->sortByDesc('created_at') as $historial)
+                                <li class="step step-primary">
+                                    <div class="text-left w-full">
+                                        <div class="font-bold text-sm">{{ $historial->created_at->format('d/m/Y H:i') }}</div>
+                                        <div class="text-xs">{{ $historial->descripcion }}</div>
+                                    </div>
+                                </li>
+                            @endforeach
+                            <li class="step step-neutral">
+                                <div class="text-left w-full">
+                                    <div class="font-bold text-sm">{{ $selectedEnvio->created_at->format('d/m/Y H:i') }}
+                                    </div>
+                                    <div class="text-xs">Envío creado</div>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
-                    <hr class="bg-success" />
-                </li>
-                <li>
-                    <hr class="bg-success" />
-                    <div class="timeline-middle">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                            class="w-5 h-5 text-success">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="timeline-end timeline-box bg-success/20 border-success">
-                        <div class="font-bold text-sm">08:30 AM - Parada 1</div>
-                        <div class="text-xs">#PKG001 - Juan Pérez ✓</div>
-                    </div>
-                    <hr class="bg-warning" />
-                </li>
-                <li>
-                    <hr class="bg-warning" />
-                    <div class="timeline-start timeline-box bg-warning/20 border-warning">
-                        <div class="font-bold text-sm">02:45 PM - Actual</div>
-                        <div class="text-xs">#PKG013 - Carlos Méndez</div>
-                    </div>
-                    <div class="timeline-middle">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                            class="w-5 h-5 text-warning">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <hr class="bg-base-300" />
-                </li>
-                <li>
-                    <hr class="bg-base-300" />
-                    <div class="timeline-middle">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                            class="w-5 h-5 text-base-content/30">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="timeline-end timeline-box">
-                        <div class="font-bold text-sm">~05:30 PM - Fin Estimado</div>
-                        <div class="text-xs">Retorno al Centro</div>
-                    </div>
-                </li>
-            </ul>
+                </div>
+            @else
+                <div class="text-center py-10 text-base-content/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-16 h-16 mx-auto mb-4 opacity-30">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                    </svg>
+                    Selecciona un paquete para ver detalles y gestionar su estado.
+                </div>
+            @endif
         </div>
     </div>
 </div>
