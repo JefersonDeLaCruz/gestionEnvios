@@ -31,11 +31,25 @@ RUN groupadd -g ${GID} laravel && \
 RUN sed -i "s/export APACHE_RUN_USER=.*/export APACHE_RUN_USER=laravel/" /etc/apache2/envvars && \
     sed -i "s/export APACHE_RUN_GROUP=.*/export APACHE_RUN_GROUP=laravel/" /etc/apache2/envvars
 
+
+
+
+
 # Dar permisos al webroot
 RUN chown -R laravel:laravel /var/www/html
+
+COPY astro.sh /usr/local/bin/astro.sh
+RUN chmod +x /usr/local/bin/astro.sh
 
 # Cambiar a usuario no root
 USER laravel
 
 WORKDIR /var/www/html
+
+
+
+
+
 EXPOSE 8000
+
+CMD ["/usr/local/bin/astro.sh"]
