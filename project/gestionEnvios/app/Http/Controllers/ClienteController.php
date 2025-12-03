@@ -12,9 +12,9 @@ class ClienteController extends Controller
     {
         if (auth()->check()) {
             auth()->logout();
-            return redirect()->route('login');
+            return view('cliente.index');
         } else {
-            return redirect()->route('login');
+            return view('cliente.index');
         }
     }
 }
