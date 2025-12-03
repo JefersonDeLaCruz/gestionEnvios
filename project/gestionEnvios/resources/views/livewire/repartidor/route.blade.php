@@ -128,14 +128,20 @@
         <div class="lg:col-span-2">
             <div class="card bg-base-100 shadow-xl h-full">
                 <div class="card-body p-0 overflow-hidden relative h-[500px] rounded-box">
-                    
+
                     {{-- Dynamic Map Container --}}
-                    <div class="h-full w-full" 
-                         wire:key="map-container-{{ $selectedEnvio ? $selectedEnvio->id : 'default' }}"
-                         x-init="initMap(
+                    @php
+                        $mapAddress = '';
+                        if ($selectedEnvio) {
+                            $receptor = $this->getReceptor($selectedEnvio);
+                            $mapAddress = $receptor->direccion ?? ($selectedEnvio->paquete->direccion ?? 'Sin dirección');
+                        }
+                    @endphp
+                    <div class="h-full w-full"
+                        wire:key="map-container-{{ $selectedEnvio ? $selectedEnvio->id : 'default' }}" x-init="initMap(
                              {{ $selectedEnvio ? $selectedEnvio->paquete->latitud : 'null' }}, 
                              {{ $selectedEnvio ? $selectedEnvio->paquete->longitud : 'null' }}, 
-                             '{{ $selectedEnvio ? ($selectedEnvio->paquete->direccion ?? 'Sin dirección') : '' }}'
+                             {{ json_encode($mapAddress) }}
                          )">
                         <div id="map" class="h-full w-full" wire:ignore></div>
                     </div>
@@ -223,7 +229,8 @@
                                         {{ $receptor->direccion ?? ($envio->paquete->direccion ?? 'Sin dirección') }}
                                     </div>
                                     <div class="text-xs text-{{ $statusColor }} mt-1 font-semibold">
-                                        {{ $envio->estadoEnvio->nombre ?? 'Desconocido' }}</div>
+                                        {{ $envio->estadoEnvio->nombre ?? 'Desconocido' }}
+                                    </div>
                                 </div>
                             </div>
                         @empty
@@ -254,7 +261,8 @@
                             </div>
                             <div class="text-right">
                                 <div class="text-sm font-bold text-primary">
-                                    {{ $selectedEnvio->paquete->tipoEnvio->nombre ?? 'Envío' }}</div>
+                                    {{ $selectedEnvio->paquete->tipoEnvio->nombre ?? 'Envío' }}
+                                </div>
                                 @if(($selectedEnvio->paquete->tipoEnvio->prioridad ?? 999) <= 1)
                                     <div class="badge badge-error text-white text-xs">Alta Prioridad</div>
                                 @endif
@@ -314,34 +322,47 @@
                         <div class="mt-6">
                             <h4 class="font-bold text-sm uppercase text-base-content/50 mb-3">Actualizar Estado</h4>
                             <div class="join w-full grid grid-cols-3">
-                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;entregado&quot;)" 
-                                        class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado' ? 'btn-success text-white' : 'btn-outline btn-success' }}"
-                                        {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado' ? 'disabled' : '' }}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;entregado&quot;)"
+                                    class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado' ? 'btn-success text-white' : 'btn-outline btn-success' }}"
+                                    {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado' ? 'disabled' : '' }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                     <span class="hidden sm:inline">Entregado</span>
                                 </button>
-                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;no-entregado&quot;)" 
-                                        class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'no-entregado' ? 'btn-error text-white' : 'btn-outline btn-error' }}"
-                                        {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'no-entregado' ? 'disabled' : '' }}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;no-entregado&quot;)"
+                                    class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'no-entregado' ? 'btn-error text-white' : 'btn-outline btn-error' }}"
+                                    {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'no-entregado' ? 'disabled' : '' }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                     <span class="hidden sm:inline">Fallido</span>
                                 </button>
-                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;pendiente&quot;)" 
-                                        class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'pendiente' ? 'btn-warning text-white' : 'btn-outline btn-warning' }}"
-                                        {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'pendiente' ? 'disabled' : '' }}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;pendiente&quot;)"
+                                    class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'pendiente' ? 'btn-warning text-white' : 'btn-outline btn-warning' }}"
+                                    {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'pendiente' ? 'disabled' : '' }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                            clip-rule="evenodd" />
                                     </svg>
                                     <span class="hidden sm:inline">Pendiente</span>
                                 </button>
                             </div>
                             @if(($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado')
                                 <div class="alert alert-success mt-3 shadow-sm text-sm py-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
                                     <span>¡Paquete entregado exitosamente!</span>
                                 </div>
                             @endif
@@ -384,44 +405,44 @@
 
     <!-- Status Update Modal -->
     @if($showModal)
-    <div class="modal modal-open">
-        <div class="modal-box">
-            <h3 class="font-bold text-lg">Confirmar Cambio de Estado</h3>
-            <p class="py-4">Estás a punto de cambiar el estado a: 
-                <span class="font-bold badge badge-lg">
-                    {{ \App\Models\EstadoEnvio::find($newStatusId)->nombre ?? 'Desconocido' }}
-                </span>
-            </p>
+        <div class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">Confirmar Cambio de Estado</h3>
+                <p class="py-4">Estás a punto de cambiar el estado a:
+                    <span class="font-bold badge badge-lg">
+                        {{ \App\Models\EstadoEnvio::find($newStatusId)->nombre ?? 'Desconocido' }}
+                    </span>
+                </p>
 
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text">Comentario (Obligatorio)</span>
-                </label>
-                <textarea wire:model="comment" class="textarea textarea-bordered h-24"
-                    placeholder="Describe el motivo del cambio..."></textarea>
-                @error('comment') <span class="text-error text-sm">{{ $message }}</span> @enderror
-            </div>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">Comentario (Obligatorio)</span>
+                    </label>
+                    <textarea wire:model="comment" class="textarea textarea-bordered h-24"
+                        placeholder="Describe el motivo del cambio..."></textarea>
+                    @error('comment') <span class="text-error text-sm">{{ $message }}</span> @enderror
+                </div>
 
-            @php
-                $statusSlug = \App\Models\EstadoEnvio::find($newStatusId)->slug ?? '';
-            @endphp
+                @php
+                    $statusSlug = \App\Models\EstadoEnvio::find($newStatusId)->slug ?? '';
+                @endphp
 
-            @if($statusSlug === 'entregado')
-            <div class="form-control w-full mt-4">
-                <label class="label">
-                    <span class="label-text">Foto de Entrega (Obligatorio)</span>
-                </label>
-                <input type="file" wire:model="photo" class="file-input file-input-bordered w-full" accept="image/*" />
-                @error('photo') <span class="text-error text-sm">{{ $message }}</span> @enderror
-                <div wire:loading wire:target="photo" class="text-sm text-info mt-2">Subiendo foto...</div>
-            </div>
-            @endif
+                @if($statusSlug === 'entregado')
+                    <div class="form-control w-full mt-4">
+                        <label class="label">
+                            <span class="label-text">Foto de Entrega (Obligatorio)</span>
+                        </label>
+                        <input type="file" wire:model="photo" class="file-input file-input-bordered w-full" accept="image/*" />
+                        @error('photo') <span class="text-error text-sm">{{ $message }}</span> @enderror
+                        <div wire:loading wire:target="photo" class="text-sm text-info mt-2">Subiendo foto...</div>
+                    </div>
+                @endif
 
-            <div class="modal-action">
-                <button wire:click="$set('showModal', false)" class="btn">Cancelar</button>
-                <button wire:click="saveStatus" class="btn btn-primary" wire:loading.attr="disabled">Confirmar</button>
+                <div class="modal-action">
+                    <button wire:click="$set('showModal', false)" class="btn">Cancelar</button>
+                    <button wire:click="saveStatus" class="btn btn-primary" wire:loading.attr="disabled">Confirmar</button>
+                </div>
             </div>
         </div>
-    </div>
     @endif
 </div>

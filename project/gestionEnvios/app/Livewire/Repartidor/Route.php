@@ -72,11 +72,15 @@ class Route extends Component
     public function selectEnvio($envioId)
     {
         $this->selectedEnvio = $this->envios->firstWhere('id', $envioId);
+
+        $receptor = $this->getReceptor($this->selectedEnvio);
+        $address = $receptor->direccion ?? ($this->selectedEnvio->paquete->direccion ?? 'Ubicación del paquete');
+
         // Dispatch event for map update if needed
         $this->dispatch('envioSelected', [
             'lat' => $this->selectedEnvio->paquete->latitud,
             'lng' => $this->selectedEnvio->paquete->longitud,
-            'address' => $this->selectedEnvio->paquete->direccion ?? 'Ubicación del paquete' // Assuming address might be in description or separate field, using fallback
+            'address' => $address
         ]);
     }
 
