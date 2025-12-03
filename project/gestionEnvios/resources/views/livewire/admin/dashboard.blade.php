@@ -77,7 +77,7 @@
     <!-- Map Section -->
     <div class="card bg-base-100 shadow-xl mb-6">
         <div class="card-body">
-            <h2 class="card-title">Mapa de Paquetes del Día</h2>
+            <h2 class="card-title">Mapa de Entregas Estimadas para Hoy</h2>
             <div id="map" class="rounded-lg"></div>
         </div>
     </div>

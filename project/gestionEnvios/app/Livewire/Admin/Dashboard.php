@@ -24,7 +24,9 @@ class Dashboard extends Component
             ->take(5)
             ->get();
 
-        $paquetesDelDia = Paquete::whereDate('created_at', Carbon::today())->get();
+        $paquetesDelDia = Paquete::whereHas('envios', function ($query) {
+            $query->whereDate('fecha_estimada', Carbon::today());
+        })->get();
 
         return view('livewire.admin.dashboard', [
             'totalPaquetes' => $totalPaquetes,
