@@ -47,7 +47,8 @@ class Route extends Component
         // Calculate statistics
         $total = $this->envios->count();
         $entregados = $this->envios->filter(fn($e) => ($e->estadoEnvio->slug ?? '') === 'entregado')->count();
-        $pendientes = $this->envios->filter(fn($e) => ($e->estadoEnvio->slug ?? '') === 'pendiente')->count();
+        // Pendientes are those that are not final (not delivered and not failed)
+        $pendientes = $this->envios->filter(fn($e) => !($e->estadoEnvio->es_final ?? false))->count();
         $progreso = $total > 0 ? round(($entregados / $total) * 100) : 0;
 
         $this->stats = [
@@ -62,14 +63,15 @@ class Route extends Component
     {
         return $this->envios->filter(function ($envio) {
             $slug = $envio->estadoEnvio->slug ?? '';
+            $esFinal = $envio->estadoEnvio->es_final ?? false;
 
             return match ($this->filter) {
                 'entregados' => $slug === 'entregado',
-                'pendientes' => $slug === 'pendiente',
+                'pendientes' => !$esFinal, // Shows asignado, en-ruta, en-bodega
                 'fallidos' => $slug === 'no-entregado',
                 default => true, // 'todos'
             };
-        });
+        })->values();
     }
 
     public function getReceptor($envio)
