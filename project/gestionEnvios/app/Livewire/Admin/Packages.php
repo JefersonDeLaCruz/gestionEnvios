@@ -216,18 +216,24 @@ class Packages extends Component
             $this->sender_nit = preg_replace('/\D/', '', $this->sender_nit);
 
             // Re-format for validation
-            if (strlen($this->sender_telefono) == 8) $this->sender_telefono = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $this->sender_telefono);
-            if (strlen($this->sender_dui) == 9) $this->sender_dui = preg_replace('/^(\d{8})(\d{1})$/', '$1-$2', $this->sender_dui);
-            if (strlen($this->sender_nit) == 14) $this->sender_nit = preg_replace('/^(\d{4})(\d{6})(\d{3})(\d{1})$/', '$1-$2-$3-$4', $this->sender_nit);
+            if (strlen($this->sender_telefono) == 8)
+                $this->sender_telefono = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $this->sender_telefono);
+            if (strlen($this->sender_dui) == 9)
+                $this->sender_dui = preg_replace('/^(\d{8})(\d{1})$/', '$1-$2', $this->sender_dui);
+            if (strlen($this->sender_nit) == 14)
+                $this->sender_nit = preg_replace('/^(\d{4})(\d{6})(\d{3})(\d{1})$/', '$1-$2-$3-$4', $this->sender_nit);
         } elseif ($this->currentStep == 2) {
             $this->receiver_telefono = preg_replace('/\D/', '', $this->receiver_telefono);
             $this->receiver_dui = preg_replace('/\D/', '', $this->receiver_dui);
             $this->receiver_nit = preg_replace('/\D/', '', $this->receiver_nit);
 
             // Re-format for validation
-            if (strlen($this->receiver_telefono) == 8) $this->receiver_telefono = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $this->receiver_telefono);
-            if (strlen($this->receiver_dui) == 9) $this->receiver_dui = preg_replace('/^(\d{8})(\d{1})$/', '$1-$2', $this->receiver_dui);
-            if (strlen($this->receiver_nit) == 14) $this->receiver_nit = preg_replace('/^(\d{4})(\d{6})(\d{3})(\d{1})$/', '$1-$2-$3-$4', $this->receiver_nit);
+            if (strlen($this->receiver_telefono) == 8)
+                $this->receiver_telefono = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $this->receiver_telefono);
+            if (strlen($this->receiver_dui) == 9)
+                $this->receiver_dui = preg_replace('/^(\d{8})(\d{1})$/', '$1-$2', $this->receiver_dui);
+            if (strlen($this->receiver_nit) == 14)
+                $this->receiver_nit = preg_replace('/^(\d{4})(\d{6})(\d{3})(\d{1})$/', '$1-$2-$3-$4', $this->receiver_nit);
         }
 
         $this->validateCurrentStep();
@@ -585,11 +591,24 @@ class Packages extends Component
             return;
         }
 
+        // Find 'Asignado' status
+        $asignadoStatus = EstadoEnvio::where('slug', 'asignado')->first();
+
         // Assign driver and vehicle to shipment
         $envio->update([
             'motorista_id' => $driver->id,
             'vehiculo_id' => $vehicle->id,
+            'estado_envio_id' => $asignadoStatus ? $asignadoStatus->id : $envio->estado_envio_id,
         ]);
+
+        // Add history record
+        if ($asignadoStatus) {
+            \App\Models\HistorialEnvio::create([
+                'envio_id' => $envio->id,
+                'estado_envio_id' => $asignadoStatus->id,
+                'comentario' => 'Paquete asignado a repartidor: ' . $driver->nombre . ' ' . $driver->apellido,
+            ]);
+        }
 
         session()->flash('message', 'Repartidor asignado exitosamente.');
         $this->closeAssignModal();

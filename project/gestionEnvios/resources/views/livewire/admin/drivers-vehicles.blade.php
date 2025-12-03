@@ -68,7 +68,7 @@
                                     <td>
                                         <div class="flex flex-wrap gap-2 items-center">
                                             <button wire:click="openDriverModal({{ $driver->id }})"
-                                                class="btn btn-ghost btn-xs">
+                                                class="btn btn-info btn-xs">
                                                 Editar
                                             </button>
                                             <button wire:click="openAssignmentModal({{ $driver->id }})"
@@ -169,7 +169,7 @@
                                     <td>
                                         <div class="flex gap-2">
                                             <button wire:click="openVehicleModal({{ $vehicle->id }})"
-                                                class="btn btn-ghost btn-xs">
+                                                class="btn btn-info btn-xs">
                                                 Editar
                                             </button>
                                             <button wire:click="deleteVehicle({{ $vehicle->id }})"

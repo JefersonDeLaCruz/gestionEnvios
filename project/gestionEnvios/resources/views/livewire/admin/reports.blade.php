@@ -343,12 +343,6 @@
                                 </td>
                                 <td>
                                     <div class="flex items-center gap-2">
-                                        <div class="avatar placeholder">
-                                            <div class="bg-neutral text-neutral-content rounded-full w-8">
-                                                <span
-                                                    class="text-xs">{{ substr($delivery->motorista->nombre ?? 'N', 0, 1) }}</span>
-                                            </div>
-                                        </div>
                                         <div>
                                             <div class="font-semibold text-sm">{{ $delivery->motorista->nombre ?? 'N/A' }}
                                                 {{ $delivery->motorista->apellido ?? '' }}</div>

@@ -19,14 +19,20 @@ class EstadoEnvioSeeder extends Seeder
         // Entregado
 
         EstadoEnvio::create([
-            'nombre' => 'Pendiente',
-            'slug' => 'pendiente',
+            'nombre' => 'En bodega',
+            'slug' => 'en-bodega',
             'es_final' => false,
         ]);
 
         EstadoEnvio::create([
-            'nombre' => 'Enviado',
-            'slug' => 'enviado',
+            'nombre' => 'Asignado',
+            'slug' => 'asignado',
+            'es_final' => false,
+        ]);
+
+        EstadoEnvio::create([
+            'nombre' => 'En ruta',
+            'slug' => 'en-ruta',
             'es_final' => false,
         ]);
 

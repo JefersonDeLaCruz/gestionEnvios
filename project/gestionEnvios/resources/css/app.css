@@ -11,8 +11,17 @@
 
     --color-secondary: hsla(271 86% 40.4% / 0.92);
 
+    --color-info: hsl(200 100% 16.3%);
 }
 
+@plugin 'daisyui/theme' {
+
+    name: lofi;
+
+    /* --color-secondary: hsla(271 86% 40.4% / 0.92); */
+
+    --color-info: hsl(191 100% 60.5%);
+}
 
 
 

@@ -135,12 +135,6 @@
                                 <td class="font-mono">{{ str_pad($user->id, 4, '0', STR_PAD_LEFT) }}</td>
                                 <td>
                                     <div class="flex items-center gap-3">
-                                        <div class="avatar placeholder">
-                                            <div class="bg-neutral text-neutral-content rounded-full w-12">
-                                                <span
-                                                    class="text-lg">{{ substr($user->nombre, 0, 1) }}{{ substr($user->apellido, 0, 1) }}</span>
-                                            </div>
-                                        </div>
                                         <div>
                                             <div class="font-bold">{{ $user->nombre }} {{ $user->apellido }}</div>
                                             @php
