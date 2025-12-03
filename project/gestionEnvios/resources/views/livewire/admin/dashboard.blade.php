@@ -63,6 +63,74 @@
         </div>
     </div>
 
+    @push('styles')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            z-index: 1;
+        }
+    </style>
+    @endpush
+
+    <!-- Map Section -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title">Mapa de Paquetes del Día</h2>
+            <div id="map" class="rounded-lg"></div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('livewire:navigated', function() {
+            initMap();
+        });
+
+        // Also init on first load if not using livewire navigation or for initial page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
+
+        function initMap() {
+            // Check if map container exists
+            if (!document.getElementById('map')) return;
+
+            // Check if map is already initialized
+            var container = L.DomUtil.get('map');
+            if (container != null) {
+                container._leaflet_id = null;
+            }
+
+            var map = L.map('map').setView([13.6929, -89.2182], 13); // San Salvador default
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            var paquetes = @json($paquetesDelDia);
+            var bounds = [];
+
+            paquetes.forEach(function(paquete) {
+                if (paquete.latitud && paquete.longitud) {
+                    var marker = L.marker([paquete.latitud, paquete.longitud]).addTo(map);
+                    marker.bindPopup(`
+                        <b>${paquete.codigo}</b><br>
+                        ${paquete.descripcion || 'Sin descripción'}
+                    `);
+                    bounds.push([paquete.latitud, paquete.longitud]);
+                }
+            });
+
+            if (bounds.length > 0) {
+                map.fitBounds(bounds);
+            }
+        }
+    </script>
+    @endpush
+
     <!-- Recent Activity -->
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
