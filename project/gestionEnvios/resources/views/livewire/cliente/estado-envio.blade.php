@@ -111,95 +111,56 @@
 
                             <ul class="timeline timeline-vertical">
                                 @if($historial && $historial->count() > 0)
-                                    @foreach($historial as $index => $item)
+                                        @foreach($historial as $index => $item)
                                         @php
                                             $isCompleted = $index < $historial->count() - 1;
                                             $isCurrent = $index === $historial->count() - 1;
-                                            $statusClass = $isCompleted ? 'success' : ($isCurrent ? 'warning' : 'base-300');
-                                            $bgClass = $isCompleted ? 'bg-success/20 border-success' : ($isCurrent ? 'bg-warning/20 border-warning' : 'bg-base-200');
+                                            $slug = $item->estadoEnvio->slug ?? '';
+                                            
+                                            // Determine styles and icons based on status
+                                            $statusConfig = match($slug) {
+                                                'en-bodega' => ['icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', 'color' => 'neutral', 'label' => 'En Bodega Central'],
+                                                'asignado' => ['icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', 'color' => 'info', 'label' => 'Recolectado'],
+                                                'en-ruta' => ['icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0', 'color' => 'warning', 'label' => 'En Ruta de Entrega'],
+                                                'entregado' => ['icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'success', 'label' => 'Entregado'],
+                                                'no-entregado' => ['icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'error', 'label' => 'Entrega Fallida'],
+                                                default => ['icon' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'base-content', 'label' => $item->estadoEnvio->nombre]
+                                            };
+
+                                            $statusClass = $statusConfig['color'];
+                                            $icon = $statusConfig['icon'];
+                                            $label = $statusConfig['label'];
                                         @endphp
 
                                         <li>
                                             @if($index > 0)
-                                                <hr class="bg-{{ $statusClass }}" />
+                                                <hr class="bg-{{ $isCompleted ? 'success' : 'base-300' }}" />
                                             @endif
 
-                                            @if($index % 2 === 0)
-                                                {{-- Left side --}}
-                                                <div class="timeline-start timeline-box {{ $bgClass }}">
-                                                    <div class="font-bold text-sm">
-                                                        {{ \Carbon\Carbon::parse($item->created_at)->format('h:i A') }}
-                                                        @if($isCurrent) - <span class="text-warning">Actual</span> @endif
-                                                    </div>
-                                                    <div class="text-xs mt-1">{{ $item->estadoEnvio->nombre }}</div>
-                                                    @if($item->comentario)
-                                                        <div class="text-xs opacity-70 mt-1">{{ $item->comentario }}</div>
-                                                    @endif
+                                            <div class="timeline-start timeline-box">
+                                                <div class="font-bold text-sm">
+                                                    {{ \Carbon\Carbon::parse($item->created_at)->format('h:i A') }}
                                                 </div>
-                                                <div class="timeline-middle">
-                                                    @if($isCompleted)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                                            class="w-5 h-5 text-success">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    @elseif($isCurrent)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                                            class="w-5 h-5 text-warning">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                                            class="w-5 h-5 text-base-content/30">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    @endif
+                                                <div class="text-xs opacity-70">{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</div>
+                                            </div>
+
+                                            <div class="timeline-middle">
+                                                <div class="p-2 rounded-full bg-{{ $isCurrent ? $statusClass : ($isCompleted ? 'success' : 'base-200') }} text-{{ $isCurrent || $isCompleted ? 'white' : 'base-content' }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}" />
+                                                    </svg>
                                                 </div>
-                                            @else
-                                                {{-- Right side --}}
-                                                <div class="timeline-middle">
-                                                    @if($isCompleted)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                                            class="w-5 h-5 text-success">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    @elseif($isCurrent)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                                            class="w-5 h-5 text-warning">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                                            class="w-5 h-5 text-base-content/30">
-                                                            <path fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    @endif
-                                                </div>
-                                                <div class="timeline-end timeline-box {{ $bgClass }}">
-                                                    <div class="font-bold text-sm">
-                                                        {{ \Carbon\Carbon::parse($item->created_at)->format('h:i A') }}
-                                                        @if($isCurrent) - <span class="text-warning">Actual</span> @endif
-                                                    </div>
-                                                    <div class="text-xs mt-1">{{ $item->estadoEnvio->nombre }}</div>
-                                                    @if($item->comentario)
-                                                        <div class="text-xs opacity-70 mt-1">{{ $item->comentario }}</div>
-                                                    @endif
-                                                </div>
-                                            @endif
+                                            </div>
+
+                                            <div class="timeline-end timeline-box border-{{ $isCurrent ? $statusClass : 'base-200' }} bg-base-100">
+                                                <div class="font-bold {{ $isCurrent ? 'text-'.$statusClass : '' }}">{{ $label }}</div>
+                                                @if($item->comentario)
+                                                    <div class="text-xs opacity-70 mt-1">{{ $item->comentario }}</div>
+                                                @endif
+                                            </div>
 
                                             @if($index < $historial->count() - 1)
-                                                <hr class="bg-{{ $statusClass }}" />
+                                                <hr class="bg-success" />
                                             @endif
                                         </li>
                                     @endforeach
