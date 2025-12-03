@@ -64,6 +64,6 @@ Route::middleware(['auth', 'role:repartidor'])
 // =======================
 
 Route::get('/admin', fn() => redirect()->route('admin.dashboard'))->name('admin');
-Route::get('/repartidor', fn() => redirect()->route('repartidor.dashboard'))->name('repartidor');
+Route::get('/repartidor', fn() => redirect()->route('repartidor.route'))->name('repartidor');
 
 
