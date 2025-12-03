@@ -260,7 +260,8 @@
 
                     {{-- Teléfono --}}
                     <div class="relative">
-                        <input type="text" wire:model="driver_telefono" id="driver_telefono" placeholder=" "
+                        <input type="text" wire:model.blur="driver_telefono" id="driver_telefono" placeholder="0000-0000" maxlength="9"
+                            x-on:input="$el.value = $el.value.replace(/\D/g, '').substring(0, 8).replace(/^(\d{4})(\d)/, '$1-$2')"
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer
                                    @error('driver_telefono') border-error @else border-base-300 @enderror">
                         <label for="driver_telefono"
@@ -352,8 +353,9 @@
 
                     {{-- Número de Placas --}}
                     <div class="relative">
-                        <input type="text" wire:model="vehicle_numero_placas" id="vehicle_numero_placas" placeholder=" "
-                            class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer
+                        <input type="text" wire:model.blur="vehicle_numero_placas" id="vehicle_numero_placas" placeholder="P123456" maxlength="10"
+                            x-on:input="$el.value = $el.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 10)"
+                            class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer uppercase
                                    @error('vehicle_numero_placas') border-error @else border-base-300 @enderror">
                         <label for="vehicle_numero_placas"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1

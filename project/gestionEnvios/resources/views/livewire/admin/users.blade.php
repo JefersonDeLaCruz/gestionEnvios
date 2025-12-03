@@ -351,7 +351,8 @@
 
                         {{-- Teléfono --}}
                         <div class="relative">
-                            <input type="text" wire:model="telefono" id="telefono" placeholder=" "
+                            <input type="text" wire:model.blur="telefono" id="telefono" placeholder="0000-0000" maxlength="9"
+                                x-on:input="$el.value = $el.value.replace(/\D/g, '').substring(0, 8).replace(/^(\d{4})(\d)/, '$1-$2')"
                                 class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer
                                        @error('telefono') border-error @else border-base-300 @enderror">
                             <label for="telefono"

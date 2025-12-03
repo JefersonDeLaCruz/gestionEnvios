@@ -101,11 +101,21 @@ class DriversVehicles extends Component
 
     public function saveDriver()
     {
+        // 1. Sanitize and format phone number
+        $rawTelefono = preg_replace('/\D/', '', $this->driver_telefono);
+
+        // Format phone: 8 digits -> 0000-0000
+        if (strlen($rawTelefono) == 8) {
+            $this->driver_telefono = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $rawTelefono);
+        } else {
+            $this->driver_telefono = $rawTelefono; // Leave raw if invalid length, validation will catch it
+        }
+
         $rules = [
             'driver_nombre' => 'required|string|max:255',
             'driver_apellido' => 'required|string|max:255',
             'driver_email' => 'required|email|max:255|unique:users,email,' . $this->editingDriverId,
-            'driver_telefono' => 'required|string|max:20',
+            'driver_telefono' => 'required|string|regex:/^\d{4}-\d{4}$/|unique:users,telefono,' . $this->editingDriverId,
             'driver_direccion' => 'required|string|max:500',
         ];
 
@@ -113,7 +123,11 @@ class DriversVehicles extends Component
             $rules['driver_password'] = 'required|string|min:8';
         }
 
-        $this->validate($rules);
+        $this->validate($rules, [
+            'driver_telefono.regex' => 'El teléfono debe tener 8 dígitos (ej: 7777-7777).',
+            'driver_telefono.unique' => 'Este número de teléfono ya está registrado.',
+            'driver_email.unique' => 'Este correo electrónico ya está registrado.',
+        ]);
 
         $data = [
             'nombre' => $this->driver_nombre,
@@ -191,13 +205,19 @@ class DriversVehicles extends Component
 
     public function saveVehicle()
     {
+        // Sanitize and format vehicle number plates
+        $rawPlacas = strtoupper(preg_replace('/[^A-Z0-9]/', '', strtoupper($this->vehicle_numero_placas)));
+        $this->vehicle_numero_placas = $rawPlacas;
+
         $this->validate([
             'vehicle_tipo_vehiculo_id' => 'required|exists:tipo_vehiculos,id',
-            'vehicle_numero_placas' => 'required|string|max:20|unique:vehiculos,numero_placas,' . $this->editingVehicleId,
+            'vehicle_numero_placas' => 'required|string|max:10|unique:vehiculos,numero_placas,' . $this->editingVehicleId,
             'vehicle_marca' => 'required|string|max:255',
             'vehicle_modelo' => 'required|string|max:255',
             'vehicle_capacidad_kg' => 'required|numeric|min:0',
             'vehicle_capacidad_m3' => 'required|numeric|min:0',
+        ], [
+            'vehicle_numero_placas.unique' => 'Este número de placas ya está registrado.',
         ]);
 
         $data = [

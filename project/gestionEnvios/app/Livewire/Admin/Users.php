@@ -40,8 +40,8 @@ class Users extends Component
         $rules = [
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->userId)],
-            'telefono' => 'required|string|max:20',
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->userId)],
+            'telefono' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/', Rule::unique('users', 'telefono')->ignore($this->userId)],
             'direccion' => 'required|string|max:255',
             'estado' => 'required|boolean',
             'role' => 'required|in:usuario,repartidor,admin',
@@ -66,6 +66,12 @@ class Users extends Component
         'password_confirmation' => 'confirmación de contraseña',
         'estado' => 'estado',
         'role' => 'rol',
+    ];
+
+    protected $messages = [
+        'telefono.regex' => 'El teléfono debe tener 8 dígitos (ej: 7777-7777).',
+        'email.unique' => 'Este correo electrónico ya está registrado.',
+        'telefono.unique' => 'Este número de teléfono ya está registrado.',
     ];
 
     public function updatingSearch()
@@ -127,7 +133,17 @@ class Users extends Component
     //funcion para guardar nuevo usuario
     public function save()
     {
-        // Validar con las reglas definidas
+        // 1. Sanitize and format phone number
+        $rawTelefono = preg_replace('/\D/', '', $this->telefono);
+        
+        // Format phone: 8 digits -> 0000-0000
+        if (strlen($rawTelefono) == 8) {
+            $this->telefono = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $rawTelefono);
+        } else {
+            $this->telefono = $rawTelefono; // Leave raw if invalid length, validation will catch it
+        }
+
+        // 2. Validate with the defined rules
         $this->validate();
 
         DB::beginTransaction();
