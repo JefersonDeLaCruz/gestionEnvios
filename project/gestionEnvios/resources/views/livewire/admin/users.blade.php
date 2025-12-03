@@ -467,7 +467,7 @@
                                 class="peer w-full px-4 pt-6 pb-2 bg-transparent border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all
                                        @error('role') border-error @else border-base-300 @enderror">
                                 <option value="">Selecciona un rol</option>
-                                <option value="usuario">Usuario</option>
+                                {{-- <option value="usuario">Usuario</option> --}}
                                 <option value="repartidor">Repartidor</option>
                                 <option value="admin">Administrador</option>
                             </select>

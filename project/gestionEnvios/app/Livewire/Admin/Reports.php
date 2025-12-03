@@ -84,18 +84,24 @@ class Reports extends Component
     public function getDriverPerformance()
     {
         $drivers = User::role('repartidor')
-            ->withCount(['envios as total_deliveries' => function ($q) {
-                $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-            }])
-            ->withSum(['envios as total_revenue' => function ($q) {
-                $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
-            }], 'costo')
-            ->withCount(['envios as completed_deliveries' => function ($q) {
-                $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
-                    ->whereHas('estadoEnvio', function ($sq) {
-                        $sq->where('es_final', true);
-                    });
-            }])
+            ->withCount([
+                'envios as total_deliveries' => function ($q) {
+                    $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+                }
+            ])
+            ->withSum([
+                'envios as total_revenue' => function ($q) {
+                    $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59']);
+                }
+            ], 'costo')
+            ->withCount([
+                'envios as completed_deliveries' => function ($q) {
+                    $q->whereBetween('created_at', [$this->dateFrom . ' 00:00:00', $this->dateTo . ' 23:59:59'])
+                        ->whereHas('estadoEnvio', function ($sq) {
+                            $sq->where('es_final', true);
+                        });
+                }
+            ])
             ->having('total_deliveries', '>', 0)
             ->orderByDesc('total_deliveries')
             ->limit(10)
