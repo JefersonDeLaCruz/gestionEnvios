@@ -24,12 +24,15 @@ class Dashboard extends Component
             ->take(5)
             ->get();
 
+        $paquetesDelDia = Paquete::whereDate('created_at', Carbon::today())->get();
+
         return view('livewire.admin.dashboard', [
             'totalPaquetes' => $totalPaquetes,
             'usuariosActivos' => $usuariosActivos,
             'vehiculos' => $vehiculos,
             'ingresosHoy' => $ingresosHoy,
             'recentActivity' => $recentActivity,
+            'paquetesDelDia' => $paquetesDelDia,
         ])->layout('layout.base-drawer');
     }
 }
