@@ -248,9 +248,10 @@
 
                     <!-- Teléfono -->
                     <div class="relative group">
-                        <input type="tel" wire:model="sender_telefono" id="sender_telefono"
+                        <input type="tel" wire:model.blur="sender_telefono" id="sender_telefono" maxlength="9"
+                            x-on:input="$el.value = $el.value.replace(/\D/g, '').substring(0, 8).replace(/^(\d{4})(\d)/, '$1-$2')"
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_telefono') border-error @enderror"
-                            placeholder=" " />
+                            placeholder="0000-0000" />
                         <label for="sender_telefono"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
                             Teléfono <span class="text-error">*</span>
@@ -274,9 +275,10 @@
 
                     <!-- DUI -->
                     <div class="relative group">
-                        <input type="text" wire:model="sender_dui" id="sender_dui"
+                        <input type="text" wire:model.blur="sender_dui" id="sender_dui" maxlength="10"
+                            x-on:input="$el.value = $el.value.replace(/\D/g, '').substring(0, 9).replace(/^(\d{8})(\d)/, '$1-$2')"
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_dui') border-error @enderror"
-                            placeholder=" " />
+                            placeholder="00000000-0" />
                         <label for="sender_dui"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
                             DUI
@@ -287,9 +289,16 @@
 
                     <!-- NIT -->
                     <div class="relative group">
-                        <input type="text" wire:model="sender_nit" id="sender_nit"
+                        <input type="text" wire:model.blur="sender_nit" id="sender_nit" maxlength="17"
+                            x-on:input="
+                                let v = $el.value.replace(/\D/g, '').substring(0, 14);
+                                if (v.length > 13) v = v.replace(/^(\d{4})(\d{6})(\d{3})(\d)/, '$1-$2-$3-$4');
+                                else if (v.length > 10) v = v.replace(/^(\d{4})(\d{6})(\d)/, '$1-$2-$3');
+                                else if (v.length > 4) v = v.replace(/^(\d{4})(\d)/, '$1-$2');
+                                $el.value = v;
+                            "
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('sender_nit') border-error @enderror"
-                            placeholder=" " />
+                            placeholder="0000-000000-000-0" />
                         <label for="sender_nit"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
                             NIT
@@ -376,9 +385,10 @@
 
                     <!-- Teléfono -->
                     <div class="relative group">
-                        <input type="tel" wire:model="receiver_telefono" id="receiver_telefono"
+                        <input type="tel" wire:model.blur="receiver_telefono" id="receiver_telefono" maxlength="9"
+                            x-on:input="$el.value = $el.value.replace(/\D/g, '').substring(0, 8).replace(/^(\d{4})(\d)/, '$1-$2')"
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_telefono') border-error @enderror"
-                            placeholder=" " />
+                            placeholder="0000-0000" />
                         <label for="receiver_telefono"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
                             Teléfono <span class="text-error">*</span>
@@ -402,9 +412,10 @@
 
                     <!-- DUI -->
                     <div class="relative group">
-                        <input type="text" wire:model="receiver_dui" id="receiver_dui"
+                        <input type="text" wire:model.blur="receiver_dui" id="receiver_dui" maxlength="10"
+                            x-on:input="$el.value = $el.value.replace(/\D/g, '').substring(0, 9).replace(/^(\d{8})(\d)/, '$1-$2')"
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_dui') border-error @enderror"
-                            placeholder=" " />
+                            placeholder="00000000-0" />
                         <label for="receiver_dui"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
                             DUI
@@ -415,9 +426,16 @@
 
                     <!-- NIT -->
                     <div class="relative group">
-                        <input type="text" wire:model="receiver_nit" id="receiver_nit"
+                        <input type="text" wire:model.blur="receiver_nit" id="receiver_nit" maxlength="17"
+                            x-on:input="
+                                let v = $el.value.replace(/\D/g, '').substring(0, 14);
+                                if (v.length > 13) v = v.replace(/^(\d{4})(\d{6})(\d{3})(\d)/, '$1-$2-$3-$4');
+                                else if (v.length > 10) v = v.replace(/^(\d{4})(\d{6})(\d)/, '$1-$2-$3');
+                                else if (v.length > 4) v = v.replace(/^(\d{4})(\d)/, '$1-$2');
+                                $el.value = v;
+                            "
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('receiver_nit') border-error @enderror"
-                            placeholder=" " />
+                            placeholder="0000-000000-000-0" />
                         <label for="receiver_nit"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
                             NIT

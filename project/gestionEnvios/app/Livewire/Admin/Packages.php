@@ -209,6 +209,27 @@ class Packages extends Component
 
     public function nextStep()
     {
+        // Sanitize inputs before validation
+        if ($this->currentStep == 1) {
+            $this->sender_telefono = preg_replace('/\D/', '', $this->sender_telefono);
+            $this->sender_dui = preg_replace('/\D/', '', $this->sender_dui);
+            $this->sender_nit = preg_replace('/\D/', '', $this->sender_nit);
+
+            // Re-format for validation
+            if (strlen($this->sender_telefono) == 8) $this->sender_telefono = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $this->sender_telefono);
+            if (strlen($this->sender_dui) == 9) $this->sender_dui = preg_replace('/^(\d{8})(\d{1})$/', '$1-$2', $this->sender_dui);
+            if (strlen($this->sender_nit) == 14) $this->sender_nit = preg_replace('/^(\d{4})(\d{6})(\d{3})(\d{1})$/', '$1-$2-$3-$4', $this->sender_nit);
+        } elseif ($this->currentStep == 2) {
+            $this->receiver_telefono = preg_replace('/\D/', '', $this->receiver_telefono);
+            $this->receiver_dui = preg_replace('/\D/', '', $this->receiver_dui);
+            $this->receiver_nit = preg_replace('/\D/', '', $this->receiver_nit);
+
+            // Re-format for validation
+            if (strlen($this->receiver_telefono) == 8) $this->receiver_telefono = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $this->receiver_telefono);
+            if (strlen($this->receiver_dui) == 9) $this->receiver_dui = preg_replace('/^(\d{8})(\d{1})$/', '$1-$2', $this->receiver_dui);
+            if (strlen($this->receiver_nit) == 14) $this->receiver_nit = preg_replace('/^(\d{4})(\d{6})(\d{3})(\d{1})$/', '$1-$2-$3-$4', $this->receiver_nit);
+        }
+
         $this->validateCurrentStep();
 
         if ($this->currentStep < 3) {
@@ -230,10 +251,10 @@ class Packages extends Component
                 'sender_nombre' => 'required|string|max:255',
                 'sender_apellido' => 'required|string|max:255',
                 'sender_direccion' => 'required|string|max:500',
-                'sender_telefono' => 'required|string|max:20',
+                'sender_telefono' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/'],
                 'sender_email' => 'nullable|email|max:255',
-                'sender_dui' => 'nullable|string|max:20',
-                'sender_nit' => 'nullable|string|max:20',
+                'sender_dui' => ['nullable', 'string', 'regex:/^\d{8}-\d{1}$/'],
+                'sender_nit' => ['nullable', 'string', 'regex:/^\d{4}-\d{6}-\d{3}-\d{1}$/'],
                 'sender_lat' => 'nullable|numeric|between:-90,90',
                 'sender_lng' => 'nullable|numeric|between:-180,180',
             ]);
@@ -242,10 +263,10 @@ class Packages extends Component
                 'receiver_nombre' => 'required|string|max:255',
                 'receiver_apellido' => 'required|string|max:255',
                 'receiver_direccion' => 'required|string|max:500',
-                'receiver_telefono' => 'required|string|max:20',
+                'receiver_telefono' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/'],
                 'receiver_email' => 'nullable|email|max:255',
-                'receiver_dui' => 'nullable|string|max:20',
-                'receiver_nit' => 'nullable|string|max:20',
+                'receiver_dui' => ['nullable', 'string', 'regex:/^\d{8}-\d{1}$/'],
+                'receiver_nit' => ['nullable', 'string', 'regex:/^\d{4}-\d{6}-\d{3}-\d{1}$/'],
             ]);
         }
     }
@@ -324,6 +345,24 @@ class Packages extends Component
             'receiver_lng' => 'required|numeric|between:-180,180',
         ]);
 
+        // Sanitize and Format Sender Data
+        $rawSenderTelefono = preg_replace('/\D/', '', $this->sender_telefono);
+        $rawSenderDui = preg_replace('/\D/', '', $this->sender_dui);
+        $rawSenderNit = preg_replace('/\D/', '', $this->sender_nit);
+
+        $formattedSenderTelefono = (strlen($rawSenderTelefono) == 8) ? preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $rawSenderTelefono) : $this->sender_telefono;
+        $formattedSenderDui = (strlen($rawSenderDui) == 9) ? preg_replace('/^(\d{8})(\d{1})$/', '$1-$2', $rawSenderDui) : $this->sender_dui;
+        $formattedSenderNit = (strlen($rawSenderNit) == 14) ? preg_replace('/^(\d{4})(\d{6})(\d{3})(\d{1})$/', '$1-$2-$3-$4', $rawSenderNit) : $this->sender_nit;
+
+        // Sanitize and Format Receiver Data
+        $rawReceiverTelefono = preg_replace('/\D/', '', $this->receiver_telefono);
+        $rawReceiverDui = preg_replace('/\D/', '', $this->receiver_dui);
+        $rawReceiverNit = preg_replace('/\D/', '', $this->receiver_nit);
+
+        $formattedReceiverTelefono = (strlen($rawReceiverTelefono) == 8) ? preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $rawReceiverTelefono) : $this->receiver_telefono;
+        $formattedReceiverDui = (strlen($rawReceiverDui) == 9) ? preg_replace('/^(\d{8})(\d{1})$/', '$1-$2', $rawReceiverDui) : $this->receiver_dui;
+        $formattedReceiverNit = (strlen($rawReceiverNit) == 14) ? preg_replace('/^(\d{4})(\d{6})(\d{3})(\d{1})$/', '$1-$2-$3-$4', $rawReceiverNit) : $this->receiver_nit;
+
         // Find or create sender client
         if ($this->sender_id) {
             $sender = Cliente::find($this->sender_id);
@@ -331,9 +370,9 @@ class Packages extends Component
                 'nombre' => $this->sender_nombre,
                 'apellido' => $this->sender_apellido,
                 'direccion' => $this->sender_direccion,
-                'telefono' => $this->sender_telefono,
-                'dui' => $this->sender_dui,
-                'nit' => $this->sender_nit,
+                'telefono' => $formattedSenderTelefono,
+                'dui' => $formattedSenderDui,
+                'nit' => $formattedSenderNit,
                 'email' => $this->sender_email,
             ]);
         } else {
@@ -343,9 +382,9 @@ class Packages extends Component
                     'nombre' => $this->sender_nombre,
                     'apellido' => $this->sender_apellido,
                     'direccion' => $this->sender_direccion,
-                    'telefono' => $this->sender_telefono,
-                    'dui' => $this->sender_dui,
-                    'nit' => $this->sender_nit,
+                    'telefono' => $formattedSenderTelefono,
+                    'dui' => $formattedSenderDui,
+                    'nit' => $formattedSenderNit,
                 ]
             );
         }
@@ -357,9 +396,9 @@ class Packages extends Component
                 'nombre' => $this->receiver_nombre,
                 'apellido' => $this->receiver_apellido,
                 'direccion' => $this->receiver_direccion,
-                'telefono' => $this->receiver_telefono,
-                'dui' => $this->receiver_dui,
-                'nit' => $this->receiver_nit,
+                'telefono' => $formattedReceiverTelefono,
+                'dui' => $formattedReceiverDui,
+                'nit' => $formattedReceiverNit,
                 'email' => $this->receiver_email,
             ]);
         } else {
@@ -369,9 +408,9 @@ class Packages extends Component
                     'nombre' => $this->receiver_nombre,
                     'apellido' => $this->receiver_apellido,
                     'direccion' => $this->receiver_direccion,
-                    'telefono' => $this->receiver_telefono,
-                    'dui' => $this->receiver_dui,
-                    'nit' => $this->receiver_nit,
+                    'telefono' => $formattedReceiverTelefono,
+                    'dui' => $formattedReceiverDui,
+                    'nit' => $formattedReceiverNit,
                 ]
             );
         }
