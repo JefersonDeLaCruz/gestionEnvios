@@ -18,6 +18,8 @@ class Packages extends Component
     public $comment;
     public $photo;
     public $showModal = false;
+    public $canAssignEnRuta = true;
+    public $capacityMessage = '';
 
     public function render()
     {
@@ -55,6 +57,28 @@ class Packages extends Component
         $this->comment = '';
         $this->photo = null;
         $this->showModal = true;
+
+        // Check capacity for this package
+        $this->checkCapacity();
+    }
+
+    public function checkCapacity()
+    {
+        $this->canAssignEnRuta = true;
+        $this->capacityMessage = '';
+
+        if ($this->selectedEnvio) {
+            // Reload with fresh relationships to avoid stale data
+            $freshEnvio = Envio::with(['vehiculo', 'paquete'])->find($this->selectedEnvio->id);
+
+            if ($freshEnvio && $freshEnvio->vehiculo) {
+                $result = $freshEnvio->vehiculo->canAccommodate($freshEnvio->paquete, $freshEnvio->id);
+                if ($result !== true) {
+                    $this->canAssignEnRuta = false;
+                    $this->capacityMessage = $result;
+                }
+            }
+        }
     }
 
     public function updateStatus()
@@ -72,6 +96,19 @@ class Packages extends Component
         if ($newStatus->slug === 'entregado' && !$this->photo) {
             $this->addError('photo', 'La foto es obligatoria para marcar como entregado.');
             return;
+        }
+
+        // Validación de capacidad del vehículo si el estado es 'en-ruta'
+        if ($newStatus->slug === 'en-ruta') {
+            $vehiculo = $this->selectedEnvio->vehiculo;
+
+            if ($vehiculo) {
+                $result = $vehiculo->canAccommodate($this->selectedEnvio->paquete, $this->selectedEnvio->id);
+                if ($result !== true) {
+                    $this->addError('newStatusId', $result);
+                    return;
+                }
+            }
         }
 
         $photoPath = null;

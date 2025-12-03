@@ -149,12 +149,30 @@
                     </label>
                     <div class="grid grid-cols-2 gap-2">
                         @foreach($estados as $estado)
-                            <button wire:click="$set('newStatusId', {{ $estado->id }})"
-                                class="btn {{ $newStatusId == $estado->id ? 'btn-primary' : 'btn-outline' }} btn-sm">
-                                {{ $estado->nombre }}
-                            </button>
+                            @php
+                                $isEnRuta = $estado->slug === 'en-ruta';
+                                $isDisabled = $isEnRuta && !$canAssignEnRuta;
+                            @endphp
+                            <div class="{{ $isDisabled ? 'tooltip tooltip-bottom' : '' }} w-full"
+                                data-tip="{{ $isDisabled ? 'Capacidad excedida' : '' }}">
+                                <button wire:click="$set('newStatusId', {{ $estado->id }})"
+                                    class="btn {{ $newStatusId == $estado->id ? 'btn-primary' : 'btn-outline' }} btn-sm w-full"
+                                    {{ $isDisabled ? 'disabled' : '' }}>
+                                    {{ $estado->nombre }}
+                                </button>
+                            </div>
                         @endforeach
                     </div>
+                    @if(!$canAssignEnRuta)
+                        <div class="alert alert-warning text-xs mt-2 py-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>{{ $capacityMessage }}</span>
+                        </div>
+                    @endif
                     @error('newStatusId') <span class="text-error text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
 

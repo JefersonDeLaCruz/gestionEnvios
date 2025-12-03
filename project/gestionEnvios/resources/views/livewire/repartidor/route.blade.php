@@ -345,19 +345,32 @@
                                     </svg>
                                     <span class="hidden sm:inline">Fallido</span>
                                 </button>
-                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;en-ruta&quot;)"
-                                    class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'en-ruta' ? 'btn-info text-white' : 'btn-outline btn-info' }}"
-                                    {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'en-ruta' ? 'disabled' : '' }}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                        fill="currentColor">
-                                        <path
-                                            d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                                        <path
-                                            d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
-                                    </svg>
-                                    <span class="hidden sm:inline">En Ruta</span>
-                                </button>
+                                <div class="{{ !$canAssignEnRuta ? 'tooltip tooltip-bottom' : '' }}"
+                                    data-tip="{{ !$canAssignEnRuta ? 'Capacidad excedida' : '' }}">
+                                    <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;en-ruta&quot;)"
+                                        class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'en-ruta' ? 'btn-info text-white' : 'btn-outline btn-info' }} w-full"
+                                        {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'en-ruta' || !$canAssignEnRuta ? 'disabled' : '' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path
+                                                d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                                            <path
+                                                d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
+                                        </svg>
+                                        <span class="hidden sm:inline">En Ruta</span>
+                                    </button>
+                                </div>
                             </div>
+                            @if(!$canAssignEnRuta)
+                                <div class="alert alert-warning text-xs mt-2 py-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ $capacityMessage }}</span>
+                                </div>
+                            @endif
                             @if(($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado')
                                 <div class="alert alert-success mt-3 shadow-sm text-sm py-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"

@@ -108,6 +108,8 @@ class Route extends Component
     public $newStatusId;
     public $comment;
     public $photo;
+    public $canAssignEnRuta = true;
+    public $capacityMessage = '';
 
     public function openModal($envioId, $statusSlug)
     {
@@ -119,6 +121,28 @@ class Route extends Component
             $this->comment = '';
             $this->photo = null;
             $this->showModal = true;
+
+            // Check capacity
+            $this->checkCapacity();
+        }
+    }
+
+    public function checkCapacity()
+    {
+        $this->canAssignEnRuta = true;
+        $this->capacityMessage = '';
+
+        if ($this->selectedEnvio) {
+            // Reload with fresh relationships to avoid stale data
+            $freshEnvio = \App\Models\Envio::with(['vehiculo', 'paquete'])->find($this->selectedEnvio->id);
+
+            if ($freshEnvio && $freshEnvio->vehiculo) {
+                $result = $freshEnvio->vehiculo->canAccommodate($freshEnvio->paquete, $freshEnvio->id);
+                if ($result !== true) {
+                    $this->canAssignEnRuta = false;
+                    $this->capacityMessage = $result;
+                }
+            }
         }
     }
 
@@ -135,6 +159,20 @@ class Route extends Component
         if ($newStatus->slug === 'entregado' && !$this->photo) {
             $this->addError('photo', 'La foto es obligatoria para marcar como entregado.');
             return;
+        }
+
+        // Validación de capacidad del vehículo si el estado es 'en-ruta'
+        if ($newStatus->slug === 'en-ruta') {
+            $envioForCheck = \App\Models\Envio::with(['vehiculo', 'paquete'])->find($this->selectedEnvio->id);
+            $vehiculo = $envioForCheck->vehiculo;
+
+            if ($vehiculo) {
+                $result = $vehiculo->canAccommodate($envioForCheck->paquete, $envioForCheck->id);
+                if ($result !== true) {
+                    $this->addError('newStatusId', $result);
+                    return;
+                }
+            }
         }
 
         $photoPath = null;
