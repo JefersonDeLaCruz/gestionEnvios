@@ -55,16 +55,16 @@ class DriversVehicles extends Component
     }
 
     public function loadDrivers()
-{
-    $this->drivers = User::role('repartidor')
-        ->where('estado', true) // Filtrar solo usuarios activos
-        ->with([
-            'vehiculos' => function ($query) {
-                $query->where('motorista_vehiculo.activo', true);
-            }
-        ])
-        ->get();
-}
+    {
+        $this->drivers = User::role('repartidor')
+            ->where('estado', true) // Filtrar solo usuarios activos
+            ->with([
+                'vehiculos' => function ($query) {
+                    $query->where('motorista_vehiculo.activo', true);
+                }
+            ])
+            ->get();
+    }
 
     public function loadVehicles()
     {
@@ -129,6 +129,7 @@ class DriversVehicles extends Component
             session()->flash('message', 'Repartidor actualizado exitosamente.');
         } else {
             $data['password'] = Hash::make($this->driver_password);
+            $data['estado'] = true;
             $driver = User::create($data);
             $driver->assignRole('repartidor');
             session()->flash('message', 'Repartidor creado exitosamente.');
