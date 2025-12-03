@@ -1,68 +1,69 @@
 <div class="p-6" x-data="{
     map: null,
-    markers: [],
-    userMarker: null,
-    initMap() {
-        // Ensure DOM is ready and container exists
-        if (!document.getElementById('map')) return;
+    redIcon: null,
 
-        // Small delay to ensure container has size
+    initMap(lat, lng, address) {
+        // Define Red Icon if not already defined
+        if (!this.redIcon) {
+            this.redIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+        }
+
+        // Cleanup existing map if it exists
+        if (this.map) {
+            this.map.remove();
+            this.map = null;
+        }
+
+        // Ensure DOM is ready
         setTimeout(() => {
-            if (this.map) {
-                this.map.remove();
-            }
+            const mapElement = document.getElementById('map');
+            if (!mapElement) return;
 
-            this.map = L.map('map').setView([13.6929, -89.2182], 13);
+            // Initialize Map
+            this.map = L.map('map').setView([lat || 13.6929, lng || -89.2182], 13);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href=\'https://www.openstreetmap.org/copyright\'>OpenStreetMap</a> contributors'
             }).addTo(this.map);
 
-            // Force map resize calculation
-            this.map.invalidateSize();
-
-            // Get user location
+            // Add User Location
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
-                        this.userMarker = L.circleMarker([latitude, longitude], {
-                            radius: 8,
-                            fillColor: '#3b82f6',
-                            color: '#fff',
-                            weight: 2,
-                            opacity: 1,
-                            fillOpacity: 0.8
+                        L.circleMarker([latitude, longitude], {
+                            radius: 8, fillColor: '#3b82f6', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.8
                         }).addTo(this.map);
                         
-                        // Only center if no package selected
-                        if ({{ $selectedEnvio ? 'false' : 'true' }}) {
+                        // If no package selected, center on user
+                        if (!lat || !lng) {
                             this.map.setView([latitude, longitude], 13);
                         }
                     },
-                    (error) => {
-                        console.error('Error getting location:', error);
-                    }
+                    (error) => console.error('Error getting location:', error)
                 );
             }
-        }, 100);
-    },
-    updateMap(lat, lng, address) {
-        if (!this.map) this.initMap();
-        
-        // Clear existing destination markers
-        this.markers.forEach(m => this.map.removeLayer(m));
-        this.markers = [];
-        
-        // Add new marker
-        const marker = L.marker([lat, lng]).addTo(this.map)
-            .bindPopup(address)
-            .openPopup();
-        this.markers.push(marker);
-        
-        this.map.setView([lat, lng], 16);
+
+            // Add Package Marker if coordinates exist
+            if (lat && lng) {
+                L.marker([lat, lng], { icon: this.redIcon }).addTo(this.map)
+                    .bindPopup(address)
+                    .openPopup();
+                
+                this.map.setView([lat, lng], 16);
+            }
+            
+            this.map.invalidateSize();
+        }, 50);
     }
-}" x-init="initMap()" @envio-selected.window="updateMap($event.detail.lat, $event.detail.lng, $event.detail.address)">
+}">
 
     @push('styles')
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -127,7 +128,17 @@
         <div class="lg:col-span-2">
             <div class="card bg-base-100 shadow-xl h-full">
                 <div class="card-body p-0 overflow-hidden relative h-[500px] rounded-box">
-                    <div id="map" class="h-full w-full" wire:ignore></div>
+                    
+                    {{-- Dynamic Map Container --}}
+                    <div class="h-full w-full" 
+                         wire:key="map-container-{{ $selectedEnvio ? $selectedEnvio->id : 'default' }}"
+                         x-init="initMap(
+                             {{ $selectedEnvio ? $selectedEnvio->paquete->latitud : 'null' }}, 
+                             {{ $selectedEnvio ? $selectedEnvio->paquete->longitud : 'null' }}, 
+                             '{{ $selectedEnvio ? ($selectedEnvio->paquete->direccion ?? 'Sin dirección') : '' }}'
+                         )">
+                        <div id="map" class="h-full w-full" wire:ignore></div>
+                    </div>
 
                     <!-- Map Controls Overlay -->
                     <div class="absolute bottom-4 left-4 right-4 z-1000 flex justify-between pointer-events-none">

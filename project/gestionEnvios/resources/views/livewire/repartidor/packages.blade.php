@@ -2,8 +2,8 @@
     <!-- Page Header -->
     <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-bold">Mis Paquetes</h1>
-            <p class="text-base-content/70 mt-1">Gestión de paquetes asignados para entrega</p>
+            <h1 class="text-3xl font-bold">Historial de Paquetes</h1>
+            <p class="text-base-content/70 mt-1">Historial completo de todos tus paquetes asignados</p>
         </div>
         <button class="btn btn-primary gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -81,7 +81,7 @@
     <!-- Packages Table -->
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-            <h2 class="card-title mb-4">Lista de Paquetes ({{ now()->format('d/m/Y') }})</h2>
+            <h2 class="card-title mb-4">Todos los Paquetes</h2>
             <div class="overflow-x-auto">
                 <table class="table table-zebra">
                     <thead>
@@ -95,50 +95,47 @@
                     </thead>
                     <tbody>
                         @forelse($envios as $envio)
-                        @php
-                        // Normalizar nombre del estado y evitar null
-                        $estado_norm = strtolower(trim($envio->estadoEnvio->nombre ?? ''));
-                        @endphp
+                            @php
+                                // Normalizar nombre del estado y evitar null
+                                $estado_norm = strtolower(trim($envio->estadoEnvio->nombre ?? ''));
+                            @endphp
 
-                        {{-- Saltar si ya está entregado --}}
-                        @if ($estado_norm === 'entregado')
-                        @continue
-                        @endif
 
-                        <tr class="hover">
-                            <td class="font-mono font-bold">#{{ $envio->paquete->codigo }}</td>
 
-                            <td>
-                                <div class="font-semibold">{{ $envio->paquete->descripcion }}</div>
-                                <div class="text-xs text-base-content/60">
-                                    {{ $envio->paquete->peso }}kg - {{ $envio->paquete->dimensiones }}
-                                </div>
-                            </td>
+                            <tr class="hover">
+                                <td class="font-mono font-bold">#{{ $envio->paquete->codigo }}</td>
 
-                            <td>
-                                <div class="text-sm">
-                                    {{ $envio->paquete->tipoEnvio->nombre }}
-                                </div>
-                            </td>
+                                <td>
+                                    <div class="font-semibold">{{ $envio->paquete->descripcion }}</div>
+                                    <div class="text-xs text-base-content/60">
+                                        {{ $envio->paquete->peso }}kg - {{ $envio->paquete->dimensiones }}
+                                    </div>
+                                </td>
 
-                            <td>
-                                <span class="badge badge-ghost">
-                                    {{ $envio->estadoEnvio->nombre ?? 'Desconocido' }}
-                                </span>
-                            </td>
+                                <td>
+                                    <div class="text-sm">
+                                        {{ $envio->paquete->tipoEnvio->nombre }}
+                                    </div>
+                                </td>
 
-                            <td>
-                                <button wire:click="openModal({{ $envio->id }})" class="btn btn-primary btn-xs">
-                                    Actualizar Estado
-                                </button>
-                            </td>
-                        </tr>
+                                <td>
+                                    <span class="badge badge-ghost">
+                                        {{ $envio->estadoEnvio->nombre ?? 'Desconocido' }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <button wire:click="openModal({{ $envio->id }})" class="btn btn-primary btn-xs">
+                                        Actualizar Estado
+                                    </button>
+                                </td>
+                            </tr>
                         @empty
-                        <tr>
-                            <td colspan="5" class="text-center py-4">
-                                No tienes paquetes asignados para hoy.
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    No tienes paquetes asignados para hoy.
+                                </td>
+                            </tr>
                         @endforelse
 
                     </tbody>
@@ -149,57 +146,57 @@
 
     <!-- Status Update Modal -->
     @if($showModal)
-    <div class="modal modal-open">
-        <div class="modal-box">
-            <h3 class="font-bold text-lg">Actualizar Estado del Envío #{{ $selectedEnvio->paquete->codigo }}</h3>
+        <div class="modal modal-open">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">Actualizar Estado del Envío #{{ $selectedEnvio->paquete->codigo }}</h3>
 
-            <div class="form-control w-full mt-4">
-                <label class="label">
-                    <span class="label-text">Nuevo Estado</span>
-                </label>
-                <div class="grid grid-cols-2 gap-2">
-                    @foreach($estados as $estado)
-                    <button wire:click="$set('newStatusId', {{ $estado->id }})"
-                        class="btn {{ $newStatusId == $estado->id ? 'btn-primary' : 'btn-outline' }} btn-sm">
-                        {{ $estado->nombre }}
-                    </button>
-                    @endforeach
+                <div class="form-control w-full mt-4">
+                    <label class="label">
+                        <span class="label-text">Nuevo Estado</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-2">
+                        @foreach($estados as $estado)
+                            <button wire:click="$set('newStatusId', {{ $estado->id }})"
+                                class="btn {{ $newStatusId == $estado->id ? 'btn-primary' : 'btn-outline' }} btn-sm">
+                                {{ $estado->nombre }}
+                            </button>
+                        @endforeach
+                    </div>
+                    @error('newStatusId') <span class="text-error text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
-                @error('newStatusId') <span class="text-error text-sm mt-1">{{ $message }}</span> @enderror
-            </div>
 
-            <div class="form-control w-full mt-4">
-                <label class="label">
-                    <span class="label-text">Comentario</span>
-                </label>
-                <textarea wire:model="comment" class="textarea textarea-bordered h-24"
-                    placeholder="Añadir un comentario..."></textarea>
-                @error('comment') <span class="text-error text-sm">{{ $message }}</span> @enderror
-            </div>
+                <div class="form-control w-full mt-4">
+                    <label class="label">
+                        <span class="label-text">Comentario</span>
+                    </label>
+                    <textarea wire:model="comment" class="textarea textarea-bordered h-24"
+                        placeholder="Añadir un comentario..."></textarea>
+                    @error('comment') <span class="text-error text-sm">{{ $message }}</span> @enderror
+                </div>
 
-            <!-- Show photo input if status is 'entregado' (checking by ID or name in loop, but here we need to know which one is selected) -->
-            <!-- Using a helper property or checking the selected status in the list -->
-            @php
-            $selectedStatus = $estados->find($newStatusId);
-            @endphp
+                <!-- Show photo input if status is 'entregado' (checking by ID or name in loop, but here we need to know which one is selected) -->
+                <!-- Using a helper property or checking the selected status in the list -->
+                @php
+                    $selectedStatus = $estados->find($newStatusId);
+                @endphp
 
-            @if($selectedStatus && $selectedStatus->slug === 'entregado')
-            <div class="form-control w-full mt-4">
-                <label class="label">
-                    <span class="label-text">Foto de Entrega (Obligatorio)</span>
-                </label>
-                <input type="file" wire:model="photo" class="file-input file-input-bordered w-full" accept="image/*" />
-                @error('photo') <span class="text-error text-sm">{{ $message }}</span> @enderror
+                @if($selectedStatus && $selectedStatus->slug === 'entregado')
+                    <div class="form-control w-full mt-4">
+                        <label class="label">
+                            <span class="label-text">Foto de Entrega (Obligatorio)</span>
+                        </label>
+                        <input type="file" wire:model="photo" class="file-input file-input-bordered w-full" accept="image/*" />
+                        @error('photo') <span class="text-error text-sm">{{ $message }}</span> @enderror
 
-                <div wire:loading wire:target="photo" class="text-sm text-info mt-2">Subiendo foto...</div>
-            </div>
-            @endif
+                        <div wire:loading wire:target="photo" class="text-sm text-info mt-2">Subiendo foto...</div>
+                    </div>
+                @endif
 
-            <div class="modal-action">
-                <button wire:click="$set('showModal', false)" class="btn">Cancelar</button>
-                <button wire:click="updateStatus" class="btn btn-primary" wire:loading.attr="disabled">Guardar</button>
+                <div class="modal-action">
+                    <button wire:click="$set('showModal', false)" class="btn">Cancelar</button>
+                    <button wire:click="updateStatus" class="btn btn-primary" wire:loading.attr="disabled">Guardar</button>
+                </div>
             </div>
         </div>
-    </div>
     @endif
 </div>

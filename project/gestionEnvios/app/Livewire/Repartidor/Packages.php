@@ -25,7 +25,6 @@ class Packages extends Component
 
         $envios = Envio::with(['paquete', 'estadoEnvio', 'vehiculo'])
             ->where('motorista_id', Auth::id())
-            ->whereDate('fecha_estimada', now())
             ->orderBy('created_at', 'desc')
             ->get();
 
