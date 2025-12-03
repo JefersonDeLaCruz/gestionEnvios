@@ -62,6 +62,24 @@ class EstadoEnvio extends Component
         $this->reset(['codigoPaquete', 'paquete', 'envio', 'historial', 'busquedaRealizada', 'noEncontrado']);
     }
 
+    public function refreshData()
+    {
+        if ($this->busquedaRealizada && $this->paquete) {
+            // Re-fetch envio and historial
+            $this->envio = Envio::where('paquete_id', $this->paquete->id)
+                ->with(['estadoEnvio', 'motorista', 'vehiculo'])
+                ->latest()
+                ->first();
+
+            if ($this->envio) {
+                $this->historial = $this->envio->historialEnvios()
+                    ->with('estadoEnvio')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+            }
+        }
+    }
+
     public function viewImage($url)
     {
         \Log::info('viewImage called with URL: ' . $url);
