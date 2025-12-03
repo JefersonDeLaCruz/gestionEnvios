@@ -623,7 +623,7 @@
                     @if($currentStep === 3)
                         <div class="form-control mt-6 mb-4">
                             <label
-                                class="label cursor-pointer justify-start gap-3 p-4 border border-base-300 rounded-lg hover:bg-base-200 transition">
+                                class="overflow-x-auto w-full label cursor-pointer justify-start gap-3 p-4 border border-base-300 rounded-lg hover:bg-base-200 transition">
                                 <input type="checkbox" wire:model="send_email_notification"
                                     class="checkbox checkbox-secondary" />
                                 <div class="flex-1">

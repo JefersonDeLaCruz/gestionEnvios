@@ -25,6 +25,8 @@ services:
       MYSQL_DATABASE: appdb
       MYSQL_USER: appuser
       MYSQL_PASSWORD: apppass
+
+      TZ: America/El_Salvador
     command: --sql-mode="NO_ENGINE_SUBSTITUTION,ALLOW_INVALID_DATES,STRICT_TRANS_TABLES"
     ports:
       - "3307:3306"
