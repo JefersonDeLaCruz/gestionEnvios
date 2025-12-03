@@ -123,7 +123,8 @@
                             </div>
                             <div>
                                 <div class="font-bold">{{ $user->vehiculoActivo()->marca }}
-                                    {{ $user->vehiculoActivo()->modelo }}</div>
+                                    {{ $user->vehiculoActivo()->modelo }}
+                                </div>
                                 <div class="text-sm text-base-content/70">Placa: {{ $user->vehiculoActivo()->placa }}</div>
                             </div>
                             <div class="ml-auto">
@@ -184,7 +185,8 @@
                                 <!-- Phone -->
                                 <div class="relative group">
                                     <label class="text-xs font-bold text-base-content/50 uppercase ml-1">Teléfono</label>
-                                    <input type="tel" wire:model="phone"
+                                    <input type="tel" wire:model.blur="phone" placeholder="0000-0000" maxlength="9"
+                                        x-on:input="$el.value = $el.value.replace(/\D/g, '').substring(0, 8).replace(/^(\d{4})(\d)/, '$1-$2')"
                                         class="input input-bordered w-full mt-1 focus:input-primary" />
                                     @error('phone') <span class="text-error text-xs mt-1">{{ $message }}</span> @enderror
                                 </div>

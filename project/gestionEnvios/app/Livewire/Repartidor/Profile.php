@@ -3,6 +3,7 @@
 namespace App\Livewire\Repartidor;
 
 use Livewire\Component;
+use Illuminate\Validation\Rule;
 
 class Profile extends Component
 {
@@ -31,10 +32,27 @@ class Profile extends Component
 
     public function updateProfile()
     {
+        // 1. Sanitize and format phone number if provided
+        if ($this->phone) {
+            $rawTelefono = preg_replace('/\D/', '', $this->phone);
+
+            // Format phone: 8 digits -> 0000-0000
+            if (strlen($rawTelefono) == 8) {
+                $this->phone = preg_replace('/^(\d{4})(\d{4})$/', '$1-$2', $rawTelefono);
+            } else {
+                $this->phone = $rawTelefono; // Leave raw if invalid length, validation will catch it
+            }
+        }
+
+        // 2. Validate
         $this->validate([
-            'email' => 'required|email|unique:users,email,' . auth()->id(),
-            'phone' => 'nullable|string|max:20',
+            'email' => ['required', 'email', 'unique:users,email,' . auth()->id()],
+            'phone' => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/', Rule::unique('users', 'telefono')->ignore(auth()->id())],
             'address' => 'nullable|string|max:255',
+        ], [
+            'phone.regex' => 'El teléfono debe tener 8 dígitos (ej: 7777-7777).',
+            'phone.unique' => 'Este número de teléfono ya está registrado.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
         ]);
 
         $user = auth()->user();
@@ -44,7 +62,7 @@ class Profile extends Component
         $user->save();
 
         $this->showEditModal = false;
-        // You might want to add a success notification here
+        session()->flash('message', 'Perfil actualizado exitosamente.');
     }
 
     public function updatePassword()
