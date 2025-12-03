@@ -16,13 +16,19 @@ class PaqueteFactory extends Factory
      */
     public function definition(): array
     {
+        // Coordenadas de San Miguel, El Salvador
+        // Latitud: aproximadamente 13.45 a 13.51
+        // Longitud: aproximadamente -88.22 a -88.14
+        $latitud = fake()->randomFloat(6, 13.45, 13.51);
+        $longitud = fake()->randomFloat(6, -88.22, -88.14);
+
         return [
-            'codigo' => fake()->unique()->numberBetween(100000000, 999999999),
-            'descripcion' => fake()->sentence(),
-            'peso' => fake()->numberBetween(1, 100),
-            'longitud' => fake()->longitude(),
-            'latitud' =>fake()->latitude(),
-            'dimensiones' => fake()->numberBetween(1, 100) . 'x' . fake()->numberBetween(1, 100) . 'x' . fake()->numberBetween(1, 100),
+            'codigo' => fake()->unique()->numerify('PKG-########'), // Código más legible
+            'descripcion' => fake()->sentence(3),
+            'peso' => fake()->randomFloat(2, 0.5, 100), // Peso en kg con decimales
+            'latitud' => $latitud,
+            'longitud' => $longitud,
+            'dimensiones' => fake()->numberBetween(10, 100),// Volumen en cm³
             'tipo_envio_id' => \App\Models\TipoEnvio::inRandomOrder()->first()->id,
         ];
     }

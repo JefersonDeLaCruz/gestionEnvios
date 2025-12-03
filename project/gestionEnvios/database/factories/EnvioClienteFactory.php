@@ -17,8 +17,8 @@ class EnvioClienteFactory extends Factory
     public function definition(): array
     {
         return [
-            'cliente_id' => fake()->numberBetween(1, 10),
-            'paquete_id' => fake()->numberBetween(1, 10),
+            'cliente_id' => \App\Models\Cliente::inRandomOrder()->first()?->id ?? \App\Models\Cliente::factory(),
+            'paquete_id' => \App\Models\Paquete::inRandomOrder()->first()?->id ?? \App\Models\Paquete::factory(),
             'tipo_cliente' => fake()->randomElement(['emisor', 'receptor']),
         ];
     }

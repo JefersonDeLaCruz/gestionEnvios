@@ -14,6 +14,6 @@ class EnvioSeeder extends Seeder
      */
     public function run(): void
     {
-        Envio::factory()->count(10)->create();
+        Envio::factory()->count(15)->create(); // Aumentado para coincidir con paquetes
     }
 }

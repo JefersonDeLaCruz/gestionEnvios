@@ -13,6 +13,6 @@ class VehiculoSeeder extends Seeder
      */
     public function run(): void
     {
-        Vehiculo::factory()->count(10)->create();
+        Vehiculo::factory()->count(5)->create(); // Reducido: cantidad más realista de vehículos
     }
 }

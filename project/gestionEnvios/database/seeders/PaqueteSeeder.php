@@ -13,6 +13,6 @@ class PaqueteSeeder extends Seeder
      */
     public function run(): void
     {
-        Paquete::factory()->count(10)->create();
+        Paquete::factory()->count(15)->create(); // Aumentado para más datos de prueba
     }
 }

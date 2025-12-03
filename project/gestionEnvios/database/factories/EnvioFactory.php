@@ -21,7 +21,7 @@ class EnvioFactory extends Factory
             'vehiculo_id' => \App\Models\Vehiculo::inRandomOrder()->first()->id ?? \App\Models\Vehiculo::factory(),
             'motorista_id' => \App\Models\User::role('repartidor')->inRandomOrder()->first()->id ?? \App\Models\User::factory(),
             'estado_envio_id' => \App\Models\EstadoEnvio::inRandomOrder()->first()->id ?? \App\Models\EstadoEnvio::factory(),
-            'fecha_estimada' => fake()->dateTimeBetween('now', '+1 week'),
+            'fecha_estimada' => now(), // Fecha estimada de hoy
             'costo' => fake()->randomFloat(2, 10, 500),
         ];
     }

@@ -20,9 +20,9 @@ class ClienteFactory extends Factory
             'nombre' => fake()->name(),
             'apellido' => fake()->lastName(),
             'direccion' => fake()->address(),
-            'telefono' => fake()->phoneNumber(),
-            'email' => fake()->email(),
-            'dui' => fake()->unique()->numerify('########-#'),  
+            'telefono' => fake()->numerify('####-####'), // Formato salvadoreño
+            'email' => fake()->unique()->safeEmail(),
+            'dui' => fake()->unique()->numerify('########-#'),
             'nit' => fake()->unique()->numerify('####-######-###-#'),
         ];
     }
