@@ -149,7 +149,7 @@
     <!-- Modal for New Shipment - Multi-Step Wizard -->
     @if($showModal)
         <div class="modal modal-open">
-            <div class="modal-box max-w-lg border border-base-300">
+            <div class="modal-box max-w-lg max-h-175 lg:max-h-190 border border-base-300">
                 <!-- Modal Header -->
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-base-content">Nuevo Envío</h2>
@@ -502,7 +502,8 @@
                             <!-- Tipo de Envío -->
                             <div class="relative group">
                                 <select wire:model="tipo_envio_id" id="tipo_envio_id"
-                                    class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('tipo_envio_id') border-error @enderror">
+                                    class="h-fit select block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('tipo_envio_id') border-error @enderror">
+                                    
                                     <option value="">Seleccione un tipo</option>
                                     @foreach($tiposEnvio as $tipo)
                                         <option value="{{ $tipo->id }}">{{ ucfirst($tipo->nombre) }}</option>
