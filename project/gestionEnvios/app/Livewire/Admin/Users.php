@@ -33,7 +33,7 @@ class Users extends Component
     public $estado = 1;
     public $role = 'usuario';
 
-    protected $paginationTheme = 'daisyui';
+    protected $paginationTheme = 'tailwind';
 
     protected function rules()
     {

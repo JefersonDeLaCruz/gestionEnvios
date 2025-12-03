@@ -39,6 +39,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/fleet', \App\Livewire\Admin\Fleet::class)->name('admin.fleet');
         Route::get('/reports', \App\Livewire\Admin\Reports::class)->name('admin.reports');
         Route::get('/settings', \App\Livewire\Admin\Settings::class)->name('admin.settings');
+        Route::get('/clients', \App\Livewire\Admin\Clients::class)->name('admin.clients');
     });
 
 // =======================
@@ -65,5 +66,3 @@ Route::middleware(['auth', 'role:repartidor'])
 
 Route::get('/admin', fn() => redirect()->route('admin.dashboard'))->name('admin');
 Route::get('/repartidor', fn() => redirect()->route('repartidor.dashboard'))->name('repartidor');
-
-
