@@ -155,9 +155,9 @@
                                 <td>
                                     <span class="badge badge-outline">{{ $tipo->prioridad }}</span>
                                 </td>
-                                <td class="font-mono">${{ number_format($tipo->tarifa_base, 2) }}</td>
-                                <td class="font-mono">${{ number_format($tipo->tarifa_por_kg, 2) }}/kg</td>
-                                <td class="font-mono">${{ number_format($tipo->tarifa_por_m3, 2) }}/m³</td>
+                                <td class="font-mono">{{ number_format($tipo->tarifa_base, 2) }}</td>
+                                <td class="font-mono">{{ number_format($tipo->tarifa_por_kg, 2) }} %</td>
+                                <td class="font-mono">{{ number_format($tipo->tarifa_por_m3, 2) }} %</td>
                                 <td>
                                     <div class="flex gap-2">
                                         <button wire:click="openEditTipoEnvioModal({{ $tipo->id }})" class="btn btn-ghost btn-sm">

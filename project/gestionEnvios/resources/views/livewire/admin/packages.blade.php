@@ -479,12 +479,12 @@
 
                     <!-- Dimensiones -->
                     <div class="relative group">
-                        <input type="text" wire:model="dimensiones" id="dimensiones"
+                        <input type="text" wire:model.blur="dimensiones" id="dimensiones"
                             class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-base-content bg-transparent rounded-md border border-base-300 appearance-none focus:outline-none focus:ring-0 focus:border-secondary peer @error('dimensiones') border-error @enderror"
-                            placeholder=" " />
+                            placeholder="Ej: 30x20x15 o 9000" />
                         <label for="dimensiones"
                             class="absolute text-sm text-base-content/60 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-base-100 px-2 peer-focus:px-2 peer-focus:text-secondary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
-                            Dimensiones (ej: 30x20x15 cm)
+                            Dimensiones (cm) o Volumen (cm³)
                         </label>
                         @error('dimensiones') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
@@ -576,14 +576,14 @@
                                 </div>
                                 @if($peso)
                                 <div class="flex justify-between">
-                                    <span class="text-base-content/70">Peso ({{ $peso }} kg × ${{ number_format($tipoEnvio->tarifa_por_kg ?? 0, 2) }}):</span>
-                                    <span class="font-mono">${{ number_format($peso * ($tipoEnvio->tarifa_por_kg ?? 0), 2) }}</span>
+                                    <span class="text-base-content/70">Peso ({{ $peso }} kg × {{ number_format(($tipoEnvio->tarifa_por_kg ?? 0) / 100, 2) }}):</span>
+                                    <span class="font-mono">${{ number_format($peso * (($tipoEnvio->tarifa_por_kg ?? 0) / 100), 2) }}</span>
                                 </div>
                                 @endif
-                                @if($volumen_m3 > 0)
+                                @if($volumen_m3 > 0 || $dimensiones)
                                 <div class="flex justify-between">
-                                    <span class="text-base-content/70">Volumen ({{ number_format($volumen_m3, 4) }} m³ × ${{ number_format($tipoEnvio->tarifa_por_m3 ?? 0, 2) }}):</span>
-                                    <span class="font-mono">${{ number_format($volumen_m3 * ($tipoEnvio->tarifa_por_m3 ?? 0), 2) }}</span>
+                                    <span class="text-base-content/70">Volumen ({{ number_format($volumen_m3, 2) }} cm³ × {{ number_format(($tipoEnvio->tarifa_por_m3 ?? 0) / 100, 2) }}):</span>
+                                    <span class="font-mono">${{ number_format($volumen_m3 * (($tipoEnvio->tarifa_por_m3 ?? 0) / 100), 2) }}</span>
                                 </div>
                                 @endif
                                 <div class="divider my-2"></div>

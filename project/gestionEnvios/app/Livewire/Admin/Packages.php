@@ -294,15 +294,27 @@ class Packages extends Component
             return;
         }
 
-        // Parse dimensions (e.g., "30x20x15" in cm)
-        $parts = preg_split('/[xX*×]/', $this->dimensiones);
+        // Check if input is a single number (direct volume in cm³)
+        if (is_numeric($this->dimensiones)) {
+            $this->volumen_m3 = floatval($this->dimensiones);
+            return;
+        }
+
+        // Parse dimensions (allow x, *, -, space, comma)
+        $parts = preg_split('/[xX*×,\-\s]+/', $this->dimensiones);
+        // Filter empty parts
+        $parts = array_filter($parts, function ($value) {
+            return $value !== '';
+        });
+        $parts = array_values($parts);
+
         if (count($parts) === 3) {
             $largo = floatval(trim($parts[0]));
             $ancho = floatval(trim($parts[1]));
             $alto = floatval(trim($parts[2]));
 
-            // Convert cm³ to m³
-            $this->volumen_m3 = ($largo * $ancho * $alto) / 1000000;
+            // Volume in cm³
+            $this->volumen_m3 = ($largo * $ancho * $alto);
         } else {
             $this->volumen_m3 = 0;
         }
@@ -323,10 +335,14 @@ class Packages extends Component
 
         $this->calculateVolume();
 
-        // Calculate cost: base + (peso * tarifa_kg) + (volumen * tarifa_m3)
+        // Calculate cost: Base + (Peso * Porcentaje_KG/100) + (Volumen * Porcentaje_Volumen/100)
         $costoBase = $tipoEnvio->tarifa_base ?? 0;
-        $costoPeso = ($this->peso ?? 0) * ($tipoEnvio->tarifa_por_kg ?? 0);
-        $costoVolumen = $this->volumen_m3 * ($tipoEnvio->tarifa_por_m3 ?? 0);
+
+        $factorKg = ($tipoEnvio->tarifa_por_kg ?? 0) / 100;
+        $factorM3 = ($tipoEnvio->tarifa_por_m3 ?? 0) / 100;
+
+        $costoPeso = ($this->peso ?? 0) * $factorKg;
+        $costoVolumen = $this->volumen_m3 * $factorM3;
 
         $this->costo_calculado = $costoBase + $costoPeso + $costoVolumen;
     }
@@ -338,7 +354,8 @@ class Packages extends Component
         $this->validate([
             'descripcion' => 'required|string|max:1000',
             'peso' => 'required|numeric|min:0.01',
-            'dimensiones' => 'nullable|string|max:255',
+            // Allow dimensions (LxWxH) or direct volume (numeric)
+            'dimensiones' => ['nullable', 'string', 'max:255', 'regex:/^(\d+(\.\d+)?\s*[xX*×,\-\s]\s*\d+(\.\d+)?\s*[xX*×,\-\s]\s*\d+(\.\d+)?|\d+(\.\d+)?)$/'],
             'tipo_envio_id' => 'required|exists:tipos_envio,id',
             'fecha_estimada' => 'required|date|after_or_equal:' . \Carbon\Carbon::now()->setTimezone('America/El_Salvador')->format('Y-m-d'),
             'receiver_lat' => 'required|numeric|between:-90,90',
