@@ -3,34 +3,49 @@
     markers: [],
     userMarker: null,
     initMap() {
-        // Default to San Salvador if no location
-        this.map = L.map('map').setView([13.6929, -89.2182], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(this.map);
+        // Ensure DOM is ready and container exists
+        if (!document.getElementById('map')) return;
 
-        // Try to get user location
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                
-                if (this.userMarker) this.map.removeLayer(this.userMarker);
-                
-                const userIcon = L.divIcon({
-                    className: 'bg-primary rounded-full border-2 border-white shadow-lg',
-                    iconSize: [12, 12]
-                });
+        // Small delay to ensure container has size
+        setTimeout(() => {
+            if (this.map) {
+                this.map.remove();
+            }
 
-                this.userMarker = L.marker([lat, lng], {icon: userIcon}).addTo(this.map)
-                    .bindPopup('Tu ubicación');
-                
-                // Only center if no package selected yet
-                if (this.markers.length === 0) {
-                    this.map.setView([lat, lng], 14);
-                }
-            });
-        }
+            this.map = L.map('map').setView([13.6929, -89.2182], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href=\'https://www.openstreetmap.org/copyright\'>OpenStreetMap</a> contributors'
+            }).addTo(this.map);
+
+            // Force map resize calculation
+            this.map.invalidateSize();
+
+            // Get user location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        this.userMarker = L.circleMarker([latitude, longitude], {
+                            radius: 8,
+                            fillColor: '#3b82f6',
+                            color: '#fff',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(this.map);
+                        
+                        // Only center if no package selected
+                        if ({{ $selectedEnvio ? 'false' : 'true' }}) {
+                            this.map.setView([latitude, longitude], 13);
+                        }
+                    },
+                    (error) => {
+                        console.error('Error getting location:', error);
+                    }
+                );
+            }
+        }, 100);
     },
     updateMap(lat, lng, address) {
         if (!this.map) this.initMap();
@@ -65,6 +80,7 @@
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     @endpush
+
     <!-- Page Header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold">Ruta del Día</h1>
@@ -74,63 +90,34 @@
     <!-- Route Summary Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="stats shadow">
-            <div class="stat">
-                <div class="stat-figure text-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        class="inline-block w-8 h-8 stroke-current">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
-                        </path>
-                    </svg>
-                </div>
-                <div class="stat-title">Paradas Totales</div>
-                <div class="stat-value text-primary">18</div>
-                <div class="stat-desc">Ruta optimizada</div>
+            <div class="stat place-items-center">
+                <div class="stat-title">Total Paquetes</div>
+                <div class="stat-value text-primary">{{ $stats['total'] ?? 0 }}</div>
+                <div class="stat-desc">Asignados hoy</div>
             </div>
         </div>
 
         <div class="stats shadow">
-            <div class="stat">
-                <div class="stat-figure text-success">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        class="inline-block w-8 h-8 stroke-current">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
-                <div class="stat-title">Distancia Total</div>
-                <div class="stat-value text-success">65 km</div>
-                <div class="stat-desc">42 km completados</div>
+            <div class="stat place-items-center">
+                <div class="stat-title">Entregados</div>
+                <div class="stat-value text-success">{{ $stats['entregados'] ?? 0 }}</div>
+                <div class="stat-desc text-success">Completados</div>
             </div>
         </div>
 
         <div class="stats shadow">
-            <div class="stat">
-                <div class="stat-figure text-warning">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        class="inline-block w-8 h-8 stroke-current">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <div class="stat-title">Tiempo Estimado</div>
-                <div class="stat-value text-warning">8h 30m</div>
-                <div class="stat-desc">5h 30m transcurridas</div>
+            <div class="stat place-items-center">
+                <div class="stat-title">Pendientes</div>
+                <div class="stat-value text-warning">{{ $stats['pendientes'] ?? 0 }}</div>
+                <div class="stat-desc text-warning">Por entregar</div>
             </div>
         </div>
 
         <div class="stats shadow">
-            <div class="stat">
-                <div class="stat-figure text-accent">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        class="inline-block w-8 h-8 stroke-current">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
+            <div class="stat place-items-center">
                 <div class="stat-title">Progreso</div>
-                <div class="stat-value text-accent">67%</div>
-                <div class="stat-desc">12 de 18 paradas</div>
+                <div class="stat-value text-accent">{{ $stats['progreso'] ?? 0 }}%</div>
+                <div class="stat-desc">Del total</div>
             </div>
         </div>
     </div>
@@ -316,7 +303,7 @@
                         <div class="mt-6">
                             <h4 class="font-bold text-sm uppercase text-base-content/50 mb-3">Actualizar Estado</h4>
                             <div class="join w-full grid grid-cols-3">
-                                <button wire:click="openModal({{ $selectedEnvio->id }}, 'entregado')" 
+                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;entregado&quot;)" 
                                         class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado' ? 'btn-success text-white' : 'btn-outline btn-success' }}"
                                         {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'entregado' ? 'disabled' : '' }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -324,7 +311,7 @@
                                     </svg>
                                     <span class="hidden sm:inline">Entregado</span>
                                 </button>
-                                <button wire:click="openModal({{ $selectedEnvio->id }}, 'no-entregado')" 
+                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;no-entregado&quot;)" 
                                         class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'no-entregado' ? 'btn-error text-white' : 'btn-outline btn-error' }}"
                                         {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'no-entregado' ? 'disabled' : '' }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -332,7 +319,7 @@
                                     </svg>
                                     <span class="hidden sm:inline">Fallido</span>
                                 </button>
-                                <button wire:click="openModal({{ $selectedEnvio->id }}, 'pendiente')" 
+                                <button wire:click="openModal({{ $selectedEnvio->id }}, &quot;pendiente&quot;)" 
                                         class="btn join-item {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'pendiente' ? 'btn-warning text-white' : 'btn-outline btn-warning' }}"
                                         {{ ($selectedEnvio->estadoEnvio->slug ?? '') == 'pendiente' ? 'disabled' : '' }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

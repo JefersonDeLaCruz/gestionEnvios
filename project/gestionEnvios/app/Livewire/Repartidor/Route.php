@@ -7,6 +7,7 @@ use Livewire\Component;
 class Route extends Component
 {
     public $envios;
+    public $stats = [];
     public $selectedEnvio = null;
 
     public function mount()
@@ -40,6 +41,19 @@ class Route extends Component
                     $envio->created_at
                 ];
             });
+
+        // Calculate statistics
+        $total = $this->envios->count();
+        $entregados = $this->envios->filter(fn($e) => ($e->estadoEnvio->slug ?? '') === 'entregado')->count();
+        $pendientes = $this->envios->filter(fn($e) => ($e->estadoEnvio->slug ?? '') === 'pendiente')->count();
+        $progreso = $total > 0 ? round(($entregados / $total) * 100) : 0;
+
+        $this->stats = [
+            'total' => $total,
+            'entregados' => $entregados,
+            'pendientes' => $pendientes,
+            'progreso' => $progreso
+        ];
     }
 
     public function getReceptor($envio)
