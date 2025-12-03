@@ -337,7 +337,7 @@
                     {{-- Tipo de Vehículo --}}
                     <div class="relative col-span-2">
                         <select wire:model="vehicle_tipo_vehiculo_id" id="vehicle_tipo_vehiculo_id"
-                            class="peer w-full px-4 pt-6 pb-2 bg-transparent border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all
+                            class="select peer w-full
                                    @error('vehicle_tipo_vehiculo_id') border-error @else border-base-300 @enderror">
                             <option value="">Selecciona un tipo</option>
                             @foreach($tiposVehiculo as $tipo)
@@ -345,10 +345,6 @@
                             @endforeach
                             
                         </select>
-                        <label for="vehicle_tipo_vehiculo_id"
-                            class="absolute left-4 top-2 text-xs text-base-content/60 bg-base-100 px-1">
-                            Tipo de Vehículo
-                        </label>
                         @error('vehicle_tipo_vehiculo_id')
                             <span class="text-error text-xs mt-1 block">{{ $message }}</span>
                         @enderror

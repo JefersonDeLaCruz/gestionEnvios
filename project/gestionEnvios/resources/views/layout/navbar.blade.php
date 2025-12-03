@@ -32,7 +32,7 @@
           </a>
         </li>
         <li>
-          <a class="flex items-center gap-2" data-toggle-theme="black,lofi" data-act-class="ACTIVECLASS">
+          <a class="flex items-center gap-2" data-toggle-theme="sunset,lofi" data-act-class="ACTIVECLASS">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -92,7 +92,7 @@
       </li>
 
       <li class="hidden lg:flex">
-        <a class="btn btn-ghost" aria-label="Toggle Theme" data-toggle-theme="black,lofi" data-act-class="ACTIVECLASS">
+        <a class="btn btn-ghost" aria-label="Toggle Theme" data-toggle-theme="sunset,lofi" data-act-class="ACTIVECLASS">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>

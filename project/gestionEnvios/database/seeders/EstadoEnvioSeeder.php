@@ -13,11 +13,11 @@ class EstadoEnvioSeeder extends Seeder
      */
     public function run(): void
     {
-        
+
         // Pendiente
         // En ruta
         // Entregado
-        
+
         EstadoEnvio::create([
             'nombre' => 'Pendiente',
             'slug' => 'pendiente',
@@ -33,6 +33,12 @@ class EstadoEnvioSeeder extends Seeder
         EstadoEnvio::create([
             'nombre' => 'Entregado',
             'slug' => 'entregado',
+            'es_final' => true,
+        ]);
+
+        EstadoEnvio::create([
+            'nombre' => 'No Entregado',
+            'slug' => 'no-entregado',
             'es_final' => true,
         ]);
     }

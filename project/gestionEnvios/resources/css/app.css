@@ -2,12 +2,12 @@
 
 @plugin "daisyui" {
 
-    themes: black, lofi;
+    themes: sunset, lofi;
 }
 
 @plugin 'daisyui/theme' {
 
-    name: black;
+    name: sunset;
 
     --color-secondary: hsla(271 86% 40.4% / 0.92);
 
