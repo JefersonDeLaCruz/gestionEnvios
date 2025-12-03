@@ -182,15 +182,16 @@
                 <div class="card-body">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="card-title">Paradas</h2>
-                        <select class="select select-bordered select-sm">
-                            <option>Todas</option>
-                            <option>Pendientes</option>
-                            <option>Completadas</option>
+                        <select wire:model.live="filter" class="select select-bordered select-sm">
+                            <option value="todos">Todas</option>
+                            <option value="pendientes">Pendientes</option>
+                            <option value="entregados">Completadas</option>
+                            <option value="fallidos">Fallidos</option>
                         </select>
                     </div>
 
                     <div class="overflow-y-auto max-h-96 space-y-3">
-                        @forelse($envios as $envio)
+                        @forelse($this->filteredEnvios as $envio)
                             @php
                                 $receptor = $this->getReceptor($envio);
                                 $priority = $envio->paquete->tipoEnvio->prioridad ?? 999;

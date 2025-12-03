@@ -10,6 +10,8 @@ class Route extends Component
     public $stats = [];
     public $selectedEnvio = null;
 
+    public $filter = 'pendientes';
+
     public function mount()
     {
         $this->loadEnvios();
@@ -54,6 +56,20 @@ class Route extends Component
             'pendientes' => $pendientes,
             'progreso' => $progreso
         ];
+    }
+
+    public function getFilteredEnviosProperty()
+    {
+        return $this->envios->filter(function ($envio) {
+            $slug = $envio->estadoEnvio->slug ?? '';
+
+            return match ($this->filter) {
+                'entregados' => $slug === 'entregado',
+                'pendientes' => $slug === 'pendiente',
+                'fallidos' => $slug === 'no-entregado',
+                default => true, // 'todos'
+            };
+        });
     }
 
     public function getReceptor($envio)
