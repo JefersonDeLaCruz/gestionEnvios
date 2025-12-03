@@ -1,0 +1,1 @@
+<?php /**PATH /var/www/html/gestionEnvios/resources/views/layout/footer.blade.php ENDPATH**/ ?>
