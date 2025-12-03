@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+
+    themes: black, lofi;
+}
+
+@plugin 'daisyui/theme' {
+
+    name: black;
+
+    --color-secondary: hsla(271 86% 40.4% / 0.92);
+
+}
+
+
+
+
+[x-cloak] {
+    display: none !important;
+}

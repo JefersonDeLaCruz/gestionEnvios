@@ -1,0 +1,2 @@
+clonar el repo
+
