@@ -581,6 +581,21 @@
                 </div>
                 @endif
 
+                <!-- Email Notification Option (Step 3 only) -->
+                @if($currentStep === 3)
+                <div class="form-control mt-6 mb-4">
+                    <label class="label cursor-pointer justify-start gap-3 p-4 border border-base-300 rounded-lg hover:bg-base-200 transition">
+                        <input type="checkbox" wire:model="send_email_notification" class="checkbox checkbox-secondary" />
+                        <div class="flex-1">
+                            <span class="label-text font-semibold text-base">Enviar código de paquete por correo electrónico</span>
+                            <p class="text-sm text-base-content/60 mt-1">
+                                Se enviará una notificación con el código de seguimiento al emisor y receptor (solo si tienen correo electrónico registrado)
+                            </p>
+                        </div>
+                    </label>
+                </div>
+                @endif
+
                 <!-- Navigation Buttons -->
                 <div class="flex justify-between items-center mt-8">
                     @if($currentStep > 1)

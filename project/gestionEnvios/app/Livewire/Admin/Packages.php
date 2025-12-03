@@ -10,6 +10,9 @@ use App\Models\EnvioCliente;
 use App\Models\User;
 use App\Models\EstadoEnvio;
 use App\Models\TipoEnvio;
+use App\Mail\PackageCreatedMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class Packages extends Component
 {
@@ -69,6 +72,9 @@ class Packages extends Component
     public $fecha_estimada = '';
     public $costo_calculado = 0;
     public $volumen_m3 = 0;
+
+    // Email notification option
+    public $send_email_notification = true;
 
     public function updatedSearch()
     {
@@ -196,7 +202,8 @@ class Packages extends Component
             'peso',
             'dimensiones',
             'tipo_envio_id',
-            'fecha_estimada'
+            'fecha_estimada',
+            'send_email_notification'
         ]);
     }
 
@@ -401,6 +408,37 @@ class Packages extends Component
             'estado_envio_id' => 1, // Default to pending
             'costo' => $this->costo_calculado,
         ]);
+
+        // Send email notifications if enabled
+        if ($this->send_email_notification) {
+            try {
+                // Send email to sender if email exists
+                if ($sender->email) {
+                    Mail::to($sender->email)->send(
+                        new PackageCreatedMail($paquete, $sender, 'emisor', $receiver)
+                    );
+                }
+
+                // Send email to receiver if email exists
+                if ($receiver->email) {
+                    Mail::to($receiver->email)->send(
+                        new PackageCreatedMail($paquete, $receiver, 'receptor', $sender)
+                    );
+                }
+
+                Log::info('Package notification emails sent', [
+                    'package_code' => $paquete->codigo,
+                    'sender_email' => $sender->email,
+                    'receiver_email' => $receiver->email,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to send package notification emails', [
+                    'package_code' => $paquete->codigo,
+                    'error' => $e->getMessage(),
+                ]);
+                // Don't fail the package creation if email fails
+            }
+        }
 
         session()->flash('message', 'Envío creado exitosamente.');
         $this->loadPendingShipments();
