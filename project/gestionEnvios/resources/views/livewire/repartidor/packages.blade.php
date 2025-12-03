@@ -5,13 +5,6 @@
             <h1 class="text-3xl font-bold">Historial de Paquetes</h1>
             <p class="text-base-content/70 mt-1">Historial completo de todos tus paquetes asignados</p>
         </div>
-        <button class="btn btn-primary gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Reportar Problema
-        </button>
     </div>
 
     <!-- Stats Summary -->

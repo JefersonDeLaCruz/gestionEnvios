@@ -18,20 +18,20 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Left Column: Profile Card -->
-        <div class="lg:col-span-1 space-y-6">
-            <div class="card bg-base-100 shadow-xl overflow-hidden border border-base-200">
+        <div class="lg:col-span-1 space-y-6 ">
+            <div class="h-full card bg-base-100 shadow-xl overflow-hidden border border-base-200">
                 <div class="h-32 bg-gradient-to-r from-primary/10 to-secondary/10"></div>
                 <div class="card-body pt-0 relative">
-                    <div class="avatar placeholder -mt-16 mb-4 border-4 border-base-100 rounded-full w-fit">
+                    {{-- <div class="avatar placeholder -mt-16 mb-4 border-4 border-base-100 rounded-full w-fit">
                         <div
                             class="bg-neutral text-neutral-content rounded-full w-32 h-32 text-4xl font-bold shadow-md">
                             {{ substr($user->nombre, 0, 1) }}{{ substr($user->apellido, 0, 1) }}
                         </div>
                         <div class="absolute bottom-2 right-2 w-5 h-5 bg-success rounded-full border-2 border-base-100"
                             title="Activo"></div>
-                    </div>
+                    </div> --}}
 
-                    <h2 class="text-2xl font-bold">{{ $user->nombre }} {{ $user->apellido }}</h2>
+                    <h2 class="text-2xl font-bold mt-3">{{ $user->nombre }} {{ $user->apellido }}</h2>
                     <div class="flex items-center gap-2 text-base-content/70 mt-1">
                         <span class="badge badge-ghost gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
