@@ -17,13 +17,42 @@ class Route extends Component
     public function loadEnvios()
     {
         $user = auth()->user();
-        if ($user) {
-            $this->envios = \App\Models\Envio::with(['paquete', 'estadoEnvio', 'historialEnvios', 'paquete.tipoEnvio'])
-                ->where('motorista_id', $user->id)
-                ->get();
-        } else {
+
+        // Ensure user has the correct role
+        if (!$user || !$user->hasRole('repartidor')) {
             $this->envios = collect();
+            return;
         }
+
+        $this->envios = \App\Models\Envio::with([
+            'paquete',
+            'estadoEnvio',
+            'historialEnvios',
+            'paquete.tipoEnvio',
+            'paquete.envioClientes.cliente'
+        ])
+            ->where('motorista_id', $user->id)
+            ->get()
+            ->sortBy(function ($envio) {
+                // Sort by priority (1 is highest), then by creation date
+                return [
+                    $envio->paquete->tipoEnvio->prioridad ?? 999,
+                    $envio->created_at
+                ];
+            });
+    }
+
+    public function getReceptor($envio)
+    {
+        if (!$envio || !$envio->paquete || !$envio->paquete->envioClientes) {
+            return null;
+        }
+
+        $envioCliente = $envio->paquete->envioClientes
+            ->where('tipo_cliente', 'receptor')
+            ->first();
+
+        return $envioCliente ? $envioCliente->cliente : null;
     }
 
     public function selectEnvio($envioId)
@@ -37,32 +66,67 @@ class Route extends Component
         ]);
     }
 
-    public function updateStatus($envioId, $statusSlug)
+    use \Livewire\WithFileUploads;
+
+    public $showModal = false;
+    public $newStatusId;
+    public $comment;
+    public $photo;
+
+    public function openModal($envioId, $statusSlug)
     {
-        $envio = \App\Models\Envio::find($envioId);
-        $estado = \App\Models\EstadoEnvio::where('codigo', $statusSlug)->first(); // Assuming 'codigo' or similar field for slug
+        $this->selectedEnvio = $this->envios->firstWhere('id', $envioId);
+        $estado = \App\Models\EstadoEnvio::where('slug', $statusSlug)->first();
 
-        if ($envio && $estado) {
-            $envio->estado_envio_id = $estado->id;
-            $envio->save();
-
-            // Create history record
-            \App\Models\HistorialEnvio::create([
-                'envio_id' => $envio->id,
-                'estado_envio_id' => $estado->id,
-                'descripcion' => 'Estado actualizado por repartidor',
-                'fecha_cambio' => now(),
-            ]);
-
-            $this->loadEnvios();
-
-            // Update selected envio if it's the one being modified
-            if ($this->selectedEnvio && $this->selectedEnvio->id == $envioId) {
-                $this->selectedEnvio = $this->envios->firstWhere('id', $envioId);
-            }
-
-            $this->dispatch('showToast', ['message' => 'Estado actualizado correctamente', 'type' => 'success']);
+        if ($this->selectedEnvio && $estado) {
+            $this->newStatusId = $estado->id;
+            $this->comment = '';
+            $this->photo = null;
+            $this->showModal = true;
         }
+    }
+
+    public function saveStatus()
+    {
+        $this->validate([
+            'newStatusId' => 'required|exists:estado_envios,id',
+            'comment' => 'required|string|max:255', // Required as per SQL error
+            'photo' => 'nullable|image|max:10240',
+        ]);
+
+        $newStatus = \App\Models\EstadoEnvio::find($this->newStatusId);
+
+        if ($newStatus->slug === 'entregado' && !$this->photo) {
+            $this->addError('photo', 'La foto es obligatoria para marcar como entregado.');
+            return;
+        }
+
+        $photoPath = null;
+        if ($this->photo) {
+            $photoPath = $this->photo->store('comprobantes', 'public');
+        }
+
+        $envio = \App\Models\Envio::find($this->selectedEnvio->id);
+        $envio->update([
+            'estado_envio_id' => $this->newStatusId,
+        ]);
+
+        \App\Models\HistorialEnvio::create([
+            'envio_id' => $envio->id,
+            'estado_envio_id' => $this->newStatusId,
+            'comentario' => $this->comment,
+            'foto_url' => $photoPath,
+        ]);
+
+        $this->showModal = false;
+        $this->loadEnvios();
+
+        // Update selected envio reference
+        if ($this->selectedEnvio) {
+            $this->selectedEnvio = $this->envios->firstWhere('id', $this->selectedEnvio->id);
+        }
+
+        $this->dispatch('showToast', ['message' => 'Estado actualizado correctamente', 'type' => 'success']);
     }
 
     public function render()
