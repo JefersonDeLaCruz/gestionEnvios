@@ -47,7 +47,7 @@
         </li>
       </ul>
     </div>
-    <a class="btn btn-ghost text-xl">SkyBox</a>
+    <a class="btn btn-ghost text-xl">X PRESS</a>
   </div>
   <div class="navbar-center hidden lg:flex">
   </div>
