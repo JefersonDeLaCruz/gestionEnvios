@@ -10,6 +10,11 @@ class ClienteController extends Controller
 
     public function index()
     {
-        return view('cliente.index');
+        if (auth()->check()) {
+            auth()->logout();
+            return redirect()->route('login');
+        } else {
+            return redirect()->route('login');
+        }
     }
 }

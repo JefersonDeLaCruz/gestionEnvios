@@ -13,6 +13,8 @@ Route::get('/test', function () {
     return view('test');
 });
 
+//mostrar si no esta autenticado
+
 Route::get('/', [ClienteController::class, 'index'])->name('home');
 
 Route::controller(LoginController::class)->group(function () {
