@@ -2,42 +2,49 @@
 
     <!-- Search Form Section -->
     <div class="w-full max-w-md mx-auto mb-8">
-        <form wire:submit.prevent="buscarPaquete" class="flex flex-col gap-4">
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text text-base">Código de Seguimiento</span>
-                </label>
-                <input type="text" wire:model.defer="codigoPaquete" placeholder="Ej: PKG-12345678"
-                    class="input input-bordered w-full border-gray-700 focus:border-secondary focus:outline-none" />
-                @error('codigoPaquete')
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ $message }}</span>
-                    </label>
-                @enderror
-            </div>
+    <form wire:submit.prevent="buscarPaquete" class="flex flex-col gap-4">
+        <label class="label">
+            <span class="label-text text-base">Código de Seguimiento</span>
+        </label>
 
-            <div class="flex gap-2">
-                <button type="submit" class="btn btn-secondary border-none flex-1" wire:loading.attr="disabled">
-                    <span wire:loading.remove wire:target="buscarPaquete">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        Rastrear Paquete
-                    </span>
-                    <span wire:loading wire:target="buscarPaquete" class="loading loading-spinner loading-sm"></span>
-                </button>
+        <!-- Input y botón en una sola fila -->
+        <div class="flex gap-2">
+            <input type="text" wire:model.defer="codigoPaquete" 
+                placeholder="Ej: PKG-12345678"
+                class="input input-bordered flex-1 border-gray-700 focus:border-secondary focus:outline-none" />
 
-                @if($busquedaRealizada)
-                    <button type="button" wire:click="limpiarBusqueda" class="btn btn-outline">
-                        Limpiar
-                    </button>
-                @endif
-            </div>
-        </form>
-    </div>
+            <button type="submit" 
+                class="btn btn-secondary border-none" 
+                wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="buscarPaquete">
+                    <svg xmlns="http://www.w3.org/2000/svg" 
+                        class="h-5 w-5 inline-block mr-2" 
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Rastrear paquete
+                </span>
+                <span wire:loading wire:target="buscarPaquete" 
+                    class="loading loading-spinner loading-sm"></span>
+            </button>
+        </div>
 
+        <!-- Error debajo del input -->
+        @error('codigoPaquete')
+            <label class="label">
+                <span class="label-text-alt text-error">{{ $message }}</span>
+            </label>
+        @enderror
+
+        <!-- Botón limpiar -->
+        @if($busquedaRealizada)
+            <button type="button" wire:click="limpiarBusqueda" class="btn btn-outline w-full">
+                Limpiar
+            </button>
+        @endif
+    </form>
+</div>
     <!-- Results Section -->
     @if($busquedaRealizada)
         @if($noEncontrado)
